@@ -97,36 +97,42 @@ Les permissions suivantes sont disponibles pour les rôles admin :
 
 ## Données collectées — RGPD
 
-L'addon collecte et stocke les données personnelles suivantes. En tant qu'opérateur du site, vous êtes **responsable de traitement** au sens du RGPD. Vous devez mettre à jour votre politique de confidentialité pour refléter ces traitements.
+Cet addon traite des données à caractère personnel. L'opérateur du site est **responsable de traitement** au sens du Règlement (UE) 2016/679 (RGPD) et doit s'assurer que ces traitements sont couverts par sa documentation légale.
 
-### Données collectées par table
+> Cette section est fournie à titre informatif. Elle ne constitue pas un avis juridique. Le responsable de traitement reste seul compétent pour apprécier la conformité de son installation au regard de sa situation spécifique.
 
-| Table | Donnée | Finalité | Durée conseillée |
+### Traitements mis en œuvre
+
+| Table | Catégories de données | Finalité | Durée de conservation recommandée |
 |---|---|---|---|
-| `affiliates` | `customer_id`, méthode de paiement, coordonnées PayPal/bancaires | Gestion du programme d'affiliation et paiement des commissions | Durée du contrat + 5 ans (obligation comptable) |
-| `referrals` | `customer_id` du filleul, date d'inscription, date du premier achat | Suivi de la conversion et calcul des commissions | Durée du contrat affilié + 1 an |
-| `affiliate_commissions` | Montant, référence de paiement, dates | Comptabilité et traçabilité des versements | 10 ans (obligation comptable légale) |
-| `affiliate_clicks` | Aucune donnée personnelle nominative — uniquement compteur de clics | Statistiques de performance | 1 an |
+| `affiliates` | Identifiant client, méthode de paiement, coordonnées PayPal ou bancaires | Gestion du programme et versement des commissions | Durée de la relation contractuelle + 5 ans (archivage comptable) |
+| `referrals` | Identifiant du filleul, date d'inscription, date du premier achat | Attribution des commissions et suivi des conversions | Durée du contrat affilié + 1 an |
+| `affiliate_commissions` | Montants, référence de paiement, horodatages | Traçabilité comptable des versements | 10 ans (obligation légale de conservation des pièces comptables) |
+| `affiliate_clicks` | Aucune donnée nominative — compteur agrégé par code | Statistiques de performance | 1 an |
 
-### Cookie de parrainage
+### Cookie de suivi
 
-Un cookie de session est posé lors d'un clic sur un lien de parrainage (`/ref/CODE`). Il contient uniquement le **code de parrainage** (non personnel), pas d'identifiant utilisateur.
+Un cookie est posé lors d'un clic sur un lien de parrainage (`/ref/CODE`). Il contient uniquement le code de parrainage, qui n'est pas une donnée personnelle au sens du RGPD.
 
-- **Durée** : configurable dans les paramètres (défaut : 30 jours)
-- **Finalité** : attribuer la commission à l'affilié lors d'une inscription ou d'un achat
-- **Base légale recommandée** : intérêt légitime ou consentement selon votre interprétation de la directive ePrivacy
+- **Durée** : configurable (défaut 30 jours)
+- **Finalité** : rattacher une inscription ou un achat à l'affilié concerné
+- **Base légale** : à qualifier par le responsable de traitement — intérêt légitime ou consentement selon l'interprétation retenue de la directive ePrivacy 2002/58/CE
 
-### Ce que vous devez faire
+### Obligations du responsable de traitement
 
-1. **Politique de confidentialité** — Mentionner le programme d'affiliation, les données collectées sur les filleuls et les affiliés, et la durée de conservation
-2. **Droit à l'effacement** — Si un client parrainé demande la suppression de ses données, supprimer ses entrées dans `referrals` et anonymiser les `affiliate_commissions` associées
-3. **Droit d'accès** — Un affilié peut demander l'export de ses commissions et parrainages
-4. **Tiers destinataires** — Si vous utilisez la méthode de paiement PayPal, informez vos utilisateurs que leurs données (nom, montant) sont transmises à PayPal. PayPal agit en **responsable de traitement indépendant** (pas sous-traitant) : il collecte et traite des données pour ses propres finalités (anti-fraude, conformité financière). Vous devez le mentionner dans votre politique de confidentialité comme destinataire tiers.
+Les points suivants relèvent de la responsabilité de l'opérateur, non de l'addon :
 
-### Ce que l'addon fait côté technique
+1. **Information des personnes** — La politique de confidentialité doit décrire le programme d'affiliation, les catégories de données traitées, les finalités et les durées de conservation.
+2. **Droit à l'effacement** — En cas de demande d'un filleul, le responsable de traitement est tenu de supprimer ses entrées dans `referrals` et d'anonymiser les données personnelles non nécessaires dans les `affiliate_commissions` associées (nom, email, coordonnées de paiement). Les données comptables strictement nécessaires (montant, date, référence de paiement) doivent en revanche être conservées conformément à l'obligation légale de 10 ans — l'exception prévue à l'Article 17(3)(b) du RGPD s'applique.
+3. **Droit d'accès** — Un affilié peut exercer son droit d'accès aux données le concernant (commissions, parrainages, coordonnées de paiement).
+4. **Tiers destinataires** — En cas d'utilisation de PayPal comme méthode de paiement, les données transmises (identité, montant) sont traitées par PayPal en qualité de **responsable de traitement indépendant**, pour ses propres finalités (lutte contre la fraude, conformité financière). Ce transfert doit être mentionné dans la politique de confidentialité comme communication à un tiers.
 
-- Les noms de famille des filleuls sont **masqués dans l'affichage** de l'espace affilié (`Prénom I.`) — mesure de *Privacy by Design* (Article 25 RGPD), pas une garantie de conformité légale en soi
-- L'admin conserve l'accès aux données complètes pour les besoins de gestion
+### Mesures techniques intégrées (Privacy by Design — Article 25 RGPD)
+
+L'addon applique les mesures de minimisation suivantes, sans que celles-ci constituent à elles seules une conformité au RGPD :
+
+- Le nom de famille des filleuls est masqué dans l'interface affilié (`Prénom I.`) afin de limiter l'exposition des données entre utilisateurs
+- L'accès aux données complètes est restreint à l'interface d'administration
 
 
 .
