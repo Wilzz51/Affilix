@@ -121,11 +121,11 @@ Un cookie de session est posé lors d'un clic sur un lien de parrainage (`/ref/C
 1. **Politique de confidentialité** — Mentionner le programme d'affiliation, les données collectées sur les filleuls et les affiliés, et la durée de conservation
 2. **Droit à l'effacement** — Si un client parrainé demande la suppression de ses données, supprimer ses entrées dans `referrals` et anonymiser les `affiliate_commissions` associées
 3. **Droit d'accès** — Un affilié peut demander l'export de ses commissions et parrainages
-4. **Sous-traitants** — Si vous utilisez la méthode de paiement PayPal, PayPal est un sous-traitant au sens du RGPD
+4. **Tiers destinataires** — Si vous utilisez la méthode de paiement PayPal, informez vos utilisateurs que leurs données (nom, montant) sont transmises à PayPal. PayPal agit en **responsable de traitement indépendant** (pas sous-traitant) : il collecte et traite des données pour ses propres finalités (anti-fraude, conformité financière). Vous devez le mentionner dans votre politique de confidentialité comme destinataire tiers.
 
-### Ce que l'addon fait déjà
+### Ce que l'addon fait côté technique
 
-- Les noms de famille des filleuls sont **masqués** dans l'espace affilié (affiché `Prénom I.`)
+- Les noms de famille des filleuls sont **masqués dans l'affichage** de l'espace affilié (`Prénom I.`) — mesure de *Privacy by Design* (Article 25 RGPD), pas une garantie de conformité légale en soi
 - L'admin conserve l'accès aux données complètes pour les besoins de gestion
 
 
