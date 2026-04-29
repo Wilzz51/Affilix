@@ -5,7 +5,7 @@ Complete referral &amp; commission system for ClientXCMS
 
 Système d'affiliation complet pour ClientXCMS : codes de parrainage, suivi des clics, commissions automatiques et tableau de bord affilié.
 
-![Affilix Logo]([https://github.com/TONUSER/TONREPO/blob/main/thumbnail.png](https://files.sx-heberg.fr/api/shares/YFKmEuZP/files/04f41acc-a46e-44c3-a485-5cb06785f9e4?download=false)
+![Affilix Logo](https://files.sx-heberg.fr/api/shares/YFKmEuZP/files/04f41acc-a46e-44c3-a485-5cb06785f9e4?download=false)
 
 ## Prérequis
 
