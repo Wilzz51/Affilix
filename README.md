@@ -66,6 +66,8 @@ Les clients accèdent à leur espace affiliation via le menu **Affiliation** dan
 
 Le lien de parrainage a la forme : `https://votresite.com/ref/CODE`
 
+![Affilix Logo](https://files.sx-heberg.fr/api/shares/UC3jvPzk/files/23f12398-3463-442c-a9b2-a0a49d3365ea?download=false)
+
 ### Espace admin
 
 Gérez le programme depuis **Admin > Affiliation** :
@@ -73,6 +75,8 @@ Gérez le programme depuis **Admin > Affiliation** :
 - **Affiliés** — Liste, approbation, modification du taux, suspension
 - **Commissions** — Approbation et paiement en lot (avec référence de paiement)
 - **Paramètres** — Configuration globale du programme
+
+![Affilix Logo](https://files.sx-heberg.fr/api/shares/Dr6Y26jr/files/5a546e1b-c929-4f25-8e16-31d23c8417a8?download=false)
 
 ### Paiement par balance
 
