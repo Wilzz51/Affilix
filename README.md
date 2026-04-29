@@ -27,7 +27,7 @@ addons/
 php artisan migrate
 ```
 
-Cela crée les 4 tables nécessaires : `affiliates`, `referrals`, `affiliate_commissions`, `affiliate_clicks`.
+Cela crée les 5 tables nécessaires : `affiliates`, `referrals`, `affiliate_commissions`, `affiliate_clicks`, `affiliation_settings`.
 
 ### 3. Vider le cache
 
@@ -73,7 +73,7 @@ Gérez le programme depuis **Admin > Affiliation** :
 
 ### Paiement par balance
 
-Quand un affilié choisit la méthode **Balance**, le montant de la commission est crédité automatiquement sur le solde de son compte client lors du paiement paradmin.
+Quand un affilié choisit la méthode **Balance**, le montant de la commission est crédité automatiquement sur le solde de son compte client lors du paiement par l'admin.
 
 ## Permissions
 
@@ -108,7 +108,7 @@ Cet addon traite des données à caractère personnel. L'opérateur du site est 
 | `affiliates` | Identifiant client, méthode de paiement, coordonnées PayPal ou bancaires | Gestion du programme et versement des commissions | Durée de la relation contractuelle + 5 ans (archivage comptable) |
 | `referrals` | Identifiant du filleul, date d'inscription, date du premier achat | Attribution des commissions et suivi des conversions | Durée du contrat affilié + 1 an |
 | `affiliate_commissions` | Montants, référence de paiement, horodatages | Traçabilité comptable des versements | 10 ans (obligation légale de conservation des pièces comptables) |
-| `affiliate_clicks` | Aucune donnée nominative — compteur agrégé par code | Statistiques de performance | 1 an |
+| `affiliate_clicks` | Adresse IP, user agent, code de parrainage, URL visitée | Statistiques de performance (clics par affilié) | 1 an |
 
 ### Cookie de suivi
 
@@ -133,6 +133,5 @@ L'addon applique les mesures de minimisation suivantes, sans que celles-ci const
 
 - Le nom de famille des filleuls est masqué dans l'interface affilié (`Prénom I.`) afin de limiter l'exposition des données entre utilisateurs
 - L'accès aux données complètes est restreint à l'interface d'administration
-
 
 .
