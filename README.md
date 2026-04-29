@@ -1,6 +1,6 @@
 # Affilix
 Complete referral &amp; commission system for ClientXCMS
-![Affilix Logo](https://files.sx-heberg.fr/api/shares/Bkpv7N5J/files/2fae3d39-b4fe-424e-b8f4-16cbafeb2349?download=false)
+![Affilix Logo](https://files.sx-heberg.fr/api/shares/6toPf9zw/files/0b2a4b73-4060-4728-a438-b204b92176e5?download=false)
 
 # Addon Affilix — ClientXCMS
 
