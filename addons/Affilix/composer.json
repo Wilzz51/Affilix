@@ -1,0 +1,21 @@
+{
+    "name": "clientxcms/affiliation",
+    "description": "Système d'affiliation pour ClientXCMS",
+    "type": "clientxcms-addon",
+    "require": {
+        "php": ">=8.0"
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "platform-check": false
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\Addons\\Affiliation\\": "src/",
+            "App\\Addons\\Affiliation\\Database\\Seeders\\": "database/seeders/"
+        },
+        "files": [
+            "src/helpers.php"
+        ]
+    }
+}
