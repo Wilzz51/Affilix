@@ -73,40 +73,38 @@
 
 {{-- Tableau --}}
 <div class="card">
-    <div class="card-heading">
-        <h4>{{ __('Affilix::affiliation.admin.affiliates') }}</h4>
-    </div>
-
-    {{-- Barre de filtres --}}
     <form action="{{ route('affiliation.admin.index') }}" method="GET" id="filter-form">
-        <div class="px-5 py-3 border-b border-gray-100 dark:border-gray-700 flex flex-wrap gap-3 items-center">
-            <div class="flex items-center gap-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg px-3 h-9 flex-1 min-w-[180px] max-w-xs">
-                <i class="bi bi-search text-gray-400 text-xs shrink-0"></i>
-                <input type="text" name="search" id="search-input"
-                    value="{{ request('search') }}"
-                    placeholder="{{ __('Nom, email, code…') }}"
-                    class="bg-transparent text-sm text-gray-700 dark:text-gray-200 placeholder-gray-400 focus:outline-none w-full">
-            </div>
+        <div class="card-heading flex-wrap gap-y-3">
+            <h4>{{ __('Affilix::affiliation.admin.affiliates') }}</h4>
+            <div class="flex flex-wrap items-center gap-3 ml-auto">
+                <div class="flex items-center gap-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg px-3 h-9 w-56">
+                    <i class="bi bi-search text-gray-400 text-xs shrink-0"></i>
+                    <input type="text" name="search" id="search-input"
+                        value="{{ request('search') }}"
+                        placeholder="{{ __('Nom, email, code…') }}"
+                        class="bg-transparent text-sm text-gray-700 dark:text-gray-200 placeholder-gray-400 outline-none ring-0 focus:outline-none focus:ring-0 border-0 w-full">
+                </div>
 
-            <div class="flex items-center gap-1 bg-gray-100 dark:bg-gray-700/60 rounded-lg p-1">
-                @foreach(['' => __('Tous'), 'active' => __('Affilix::affiliation.active'), 'inactive' => __('Affilix::affiliation.inactive'), 'suspended' => __('Affilix::affiliation.suspended')] as $val => $label)
-                    @php $active = request('status', '') === $val; @endphp
-                    <label class="cursor-pointer">
-                        <input type="radio" name="status" value="{{ $val }}" class="sr-only status-filter" {{ $active ? 'checked' : '' }}>
-                        <span class="px-3 py-1.5 text-xs font-medium rounded-md transition-colors block
-                            {{ $active ? 'bg-white dark:bg-gray-600 text-gray-800 dark:text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200' }}">
-                            {{ $label }}
-                        </span>
-                    </label>
-                @endforeach
-            </div>
+                <div class="flex items-center gap-1 bg-gray-100 dark:bg-gray-700/60 rounded-lg p-1">
+                    @foreach(['' => __('Tous'), 'active' => __('Affilix::affiliation.active'), 'inactive' => __('Affilix::affiliation.inactive'), 'suspended' => __('Affilix::affiliation.suspended')] as $val => $label)
+                        @php $active = request('status', '') === $val; @endphp
+                        <label class="cursor-pointer">
+                            <input type="radio" name="status" value="{{ $val }}" class="sr-only status-filter" {{ $active ? 'checked' : '' }}>
+                            <span class="px-3 py-1.5 text-xs font-medium rounded-md transition-colors block
+                                {{ $active ? 'bg-white dark:bg-gray-600 text-gray-800 dark:text-white shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200' }}">
+                                {{ $label }}
+                            </span>
+                        </label>
+                    @endforeach
+                </div>
 
-            @if(request('search') || request('status'))
-                <a href="{{ route('affiliation.admin.index') }}"
-                    class="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 flex items-center gap-1">
-                    <i class="bi bi-x-circle"></i>{{ __('Réinitialiser') }}
-                </a>
-            @endif
+                @if(request('search') || request('status'))
+                    <a href="{{ route('affiliation.admin.index') }}"
+                        class="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 flex items-center gap-1">
+                        <i class="bi bi-x-circle"></i>{{ __('Réinitialiser') }}
+                    </a>
+                @endif
+            </div>
         </div>
     </form>
 
