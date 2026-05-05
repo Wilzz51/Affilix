@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Addons\Affiliation\Models\Affiliate;
 use App\Addons\Affiliation\Models\AffiliateClick;
 use App\Addons\Affiliation\Models\AffiliateCommission;
+use App\Addons\Affiliation\Models\AffiliationSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cookie;
@@ -197,16 +198,16 @@ class AffiliateController extends Controller
 
     private function createClickCommission(Affiliate $affiliate): void
     {
-        if (affiliation_setting('click_remuneration_enabled', '0') !== '1') {
+        if (AffiliationSetting::get('click_remuneration_enabled', '0') !== '1') {
             return;
         }
 
-        $rate = (float) affiliation_setting('click_remuneration_rate', 0);
+        $rate = (float) AffiliationSetting::get('click_remuneration_rate', '0');
         if ($rate <= 0) {
             return;
         }
 
-        $autoApprove = affiliation_setting('auto_approve_commissions', '0') === '1';
+        $autoApprove = (bool) affiliation_setting('auto_approve_commissions', false);
         $status = $autoApprove ? 'approved' : 'pending';
 
         DB::transaction(function () use ($affiliate, $rate, $status, $autoApprove) {

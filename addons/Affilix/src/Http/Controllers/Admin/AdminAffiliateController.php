@@ -5,6 +5,7 @@ namespace App\Addons\Affiliation\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Addons\Affiliation\Models\Affiliate;
 use App\Addons\Affiliation\Models\AffiliateCommission;
+use App\Addons\Affiliation\Models\AffiliationSetting;
 use Illuminate\Http\Request;
 
 class AdminAffiliateController extends Controller
@@ -192,7 +193,7 @@ class AdminAffiliateController extends Controller
             'default_commission_rate' => 'required|numeric|min:0|max:100',
             'minimum_payout'          => 'required|numeric|min:0',
             'cookie_lifetime'         => 'required|integer|min:1|max:365',
-            'click_remuneration_rate' => 'required|numeric|min:0',
+            'click_remuneration_rate' => 'required|numeric|min:0|max:999999',
         ]);
 
         // Checkboxes (non envoyées si décochées)
@@ -202,7 +203,12 @@ class AdminAffiliateController extends Controller
         $validated['affiliation_payment_balance']       = $request->has('affiliation_payment_balance') ? '1' : '0';
         $validated['affiliation_payment_paypal']        = $request->has('affiliation_payment_paypal') ? '1' : '0';
         $validated['affiliation_payment_bank_transfer'] = $request->has('affiliation_payment_bank_transfer') ? '1' : '0';
-        $validated['click_remuneration_enabled']        = $request->has('click_remuneration_enabled') ? '1' : '0';
+
+        // Les settings décimaux/booléens du clic sont stockés dans affiliation_settings
+        // pour éviter la conversion int automatique du SettingsService de ClientXCMS
+        AffiliationSetting::set('click_remuneration_enabled', $request->has('click_remuneration_enabled') ? '1' : '0');
+        AffiliationSetting::set('click_remuneration_rate', (string) (float) $request->input('click_remuneration_rate', 0));
+        unset($validated['click_remuneration_rate']);
 
         \App\Models\Admin\Setting::updateSettings($validated);
 

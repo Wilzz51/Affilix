@@ -173,7 +173,7 @@
                         'name'    => 'click_remuneration_enabled',
                         'label'   => __('Affilix::affiliation.settings_click_remuneration'),
                         'value'   => '1',
-                        'checked' => setting('click_remuneration_enabled', '0') == '1',
+                        'checked' => \App\Addons\Affiliation\Models\AffiliationSetting::get('click_remuneration_enabled', '0') === '1',
                         'help'    => __('Affilix::affiliation.settings_click_remuneration_help'),
                     ])
                 </div>
@@ -181,9 +181,10 @@
                     @include('shared/input', [
                         'name'  => 'click_remuneration_rate',
                         'label' => __('Affilix::affiliation.settings_click_remuneration_rate') . ' (' . setting('currency_symbol', '€') . ')',
-                        'value' => setting('click_remuneration_rate', '0.00'),
+                        'value' => \App\Addons\Affiliation\Models\AffiliationSetting::get('click_remuneration_rate', '0.00'),
                         'type'  => 'number',
-                        'step'  => '0.01',
+                        'step'  => 'any',
+                        'min'   => '0',
                         'help'  => __('Affilix::affiliation.settings_click_remuneration_rate_help'),
                     ])
                 </div>
