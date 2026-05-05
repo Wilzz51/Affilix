@@ -77,8 +77,8 @@
             <div class="mx-auto mb-2 h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
                 <i class="bi bi-cursor-fill text-blue-600 dark:text-blue-400 text-lg"></i>
             </div>
-            <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ number_format($stats['total_clicks']) }}</p>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 uppercase tracking-wide">{{ __('Affilix::affiliation.stats.total_clicks') }}</p>
+            <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ number_format($stats['unique_clicks']) }}</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 uppercase tracking-wide">{{ __('Affilix::affiliation.stats.unique_clicks') }}</p>
         </div>
     </div>
     <div class="card">

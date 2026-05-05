@@ -9,7 +9,8 @@ return [
     
     // Stats
     'stats' => [
-        'total_clicks' => 'Total Clicks',
+        'total_clicks'  => 'Unique Clicks',
+        'unique_clicks' => 'Unique Clicks',
         'total_referrals' => 'Total Referrals',
         'successful_referrals' => 'Conversions',
         'conversion_rate' => 'Conversion Rate',
@@ -73,11 +74,16 @@ return [
     ],
     
     // Commission
-    'commission_description' => 'Commission for invoice #:id',
+    'commission_description'       => 'Commission for invoice #:id',
+    'commission_click_description' => 'Commission for unique click',
 
     // Settings labels
-    'settings_first_order_only'      => 'Commission on first order only',
-    'settings_first_order_only_help' => 'If enabled, only one commission is generated per referred customer.',
+    'settings_first_order_only'             => 'Commission on first order only',
+    'settings_first_order_only_help'        => 'If enabled, only one commission is generated per referred customer.',
+    'settings_click_remuneration'           => 'Remunerate unique clicks',
+    'settings_click_remuneration_help'      => 'If enabled, each unique click on an affiliate link generates a commission.',
+    'settings_click_remuneration_rate'      => 'Amount per unique click',
+    'settings_click_remuneration_rate_help' => 'Fixed amount credited to the affiliate for each new unique visitor.',
 
     // Emails
     'emails' => [

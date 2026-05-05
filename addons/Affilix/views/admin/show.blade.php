@@ -112,8 +112,9 @@
                     <i class="bi bi-cursor text-gray-600 dark:text-gray-300 text-lg"></i>
                 </div>
                 <div>
-                    <p class="text-xl font-bold text-gray-900 dark:text-white">{{ number_format($stats['total_clicks']) }}</p>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide font-medium mt-0.5">{{ __('Clics') }}</p>
+                    <p class="text-xl font-bold text-gray-900 dark:text-white">{{ number_format($stats['unique_clicks']) }}</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide font-medium mt-0.5">{{ __('Clics uniques') }}</p>
+                    <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{{ __('Total :') }} {{ number_format($stats['total_clicks']) }}</p>
                 </div>
             </div>
         </div>

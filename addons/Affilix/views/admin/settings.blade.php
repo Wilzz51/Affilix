@@ -153,6 +153,44 @@
         </div>
     </div>
 
+    {{-- Section : Rémunération par clic --}}
+    <div class="card mb-4">
+        <div class="card-heading">
+            <div class="flex items-center gap-2.5">
+                <div class="h-8 w-8 rounded-lg bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center shrink-0">
+                    <i class="bi bi-cursor-fill text-purple-600 dark:text-purple-400 text-sm"></i>
+                </div>
+                <div>
+                    <h4 class="leading-none">{{ __('Rémunération par clic') }}</h4>
+                    <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5 font-normal">{{ __('Attribuez un montant fixe à chaque clic unique sur un lien d\'affiliation') }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div>
+                    @include('shared/checkbox', [
+                        'name'    => 'click_remuneration_enabled',
+                        'label'   => __('Affilix::affiliation.settings_click_remuneration'),
+                        'value'   => '1',
+                        'checked' => setting('click_remuneration_enabled', '0') == '1',
+                        'help'    => __('Affilix::affiliation.settings_click_remuneration_help'),
+                    ])
+                </div>
+                <div>
+                    @include('shared/input', [
+                        'name'  => 'click_remuneration_rate',
+                        'label' => __('Affilix::affiliation.settings_click_remuneration_rate') . ' (' . setting('currency_symbol', '€') . ')',
+                        'value' => setting('click_remuneration_rate', '0.00'),
+                        'type'  => 'number',
+                        'step'  => '0.01',
+                        'help'  => __('Affilix::affiliation.settings_click_remuneration_rate_help'),
+                    ])
+                </div>
+            </div>
+        </div>
+    </div>
+
     {{-- Section : Méthodes de paiement --}}
     <div class="card mb-6">
         <div class="card-heading">

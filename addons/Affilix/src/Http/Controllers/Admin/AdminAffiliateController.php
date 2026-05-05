@@ -52,10 +52,11 @@ class AdminAffiliateController extends Controller
         $affiliate->load(['customer', 'referrals.customer', 'commissions.invoice']);
 
         $stats = [
-            'total_clicks' => $affiliate->clicks()->count(),
-            'total_referrals' => $affiliate->total_referrals,
-            'successful_referrals' => $affiliate->successful_referrals,
-            'conversion_rate' => $affiliate->getConversionRate(),
+            'total_clicks'        => $affiliate->clicks()->count(),
+            'unique_clicks'       => $affiliate->unique_clicks,
+            'total_referrals'     => $affiliate->total_referrals,
+            'successful_referrals'=> $affiliate->successful_referrals,
+            'conversion_rate'     => $affiliate->getConversionRate(),
         ];
 
         return view('Affilix_admin::show', compact('affiliate', 'stats'));
@@ -189,8 +190,9 @@ class AdminAffiliateController extends Controller
     {
         $validated = $request->validate([
             'default_commission_rate' => 'required|numeric|min:0|max:100',
-            'minimum_payout' => 'required|numeric|min:0',
-            'cookie_lifetime' => 'required|integer|min:1|max:365',
+            'minimum_payout'          => 'required|numeric|min:0',
+            'cookie_lifetime'         => 'required|integer|min:1|max:365',
+            'click_remuneration_rate' => 'required|numeric|min:0',
         ]);
 
         // Checkboxes (non envoyées si décochées)
@@ -200,6 +202,7 @@ class AdminAffiliateController extends Controller
         $validated['affiliation_payment_balance']       = $request->has('affiliation_payment_balance') ? '1' : '0';
         $validated['affiliation_payment_paypal']        = $request->has('affiliation_payment_paypal') ? '1' : '0';
         $validated['affiliation_payment_bank_transfer'] = $request->has('affiliation_payment_bank_transfer') ? '1' : '0';
+        $validated['click_remuneration_enabled']        = $request->has('click_remuneration_enabled') ? '1' : '0';
 
         \App\Models\Admin\Setting::updateSettings($validated);
 

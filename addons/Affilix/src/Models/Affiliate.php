@@ -18,6 +18,7 @@ class Affiliate extends Model
         'pending_earnings',
         'paid_earnings',
         'total_referrals',
+        'unique_clicks',
         'successful_referrals',
         'status',
         'payment_method',
@@ -115,6 +116,7 @@ class Affiliate extends Model
             'paid_earnings'        => $this->commissions()->where('status', 'paid')->sum('amount'),
             'total_referrals'      => $this->referrals()->count(),
             'successful_referrals' => $this->referrals()->where('status', 'converted')->count(),
+            'unique_clicks'        => $this->clicks()->where('is_unique', true)->count(),
         ]);
     }
 }

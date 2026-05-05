@@ -140,8 +140,14 @@
                         </a>
                     </td>
                     <td class="px-4 py-3 text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap">
-                        {{ $commission->referral->customer->firstname ?? '' }}
-                        {{ $commission->referral->customer->lastname ?? ($commission->referral->customer->name ?? '—') }}
+                        @if($commission->type === 'click')
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400">
+                                <i class="bi bi-cursor-fill text-[9px]"></i>{{ __('Clic') }}
+                            </span>
+                        @else
+                            {{ $commission->referral?->customer?->firstname ?? '' }}
+                            {{ $commission->referral?->customer?->lastname ?? ($commission->referral?->customer?->name ?? '—') }}
+                        @endif
                     </td>
                     <td class="px-4 py-3">
                         @if($commission->invoice)

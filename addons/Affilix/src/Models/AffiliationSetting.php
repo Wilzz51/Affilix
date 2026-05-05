@@ -50,7 +50,11 @@ class AffiliationSetting extends Model
     {
         Cache::forget('affiliation_all_settings');
         
-        $keys = ['default_commission_rate', 'auto_approve', 'auto_approve_commissions', 'minimum_payout', 'cookie_lifetime'];
+        $keys = [
+            'default_commission_rate', 'auto_approve', 'auto_approve_commissions',
+            'minimum_payout', 'cookie_lifetime',
+            'click_remuneration_enabled', 'click_remuneration_rate',
+        ];
         foreach ($keys as $key) {
             Cache::forget("affiliation_setting_{$key}");
         }

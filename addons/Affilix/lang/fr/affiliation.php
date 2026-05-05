@@ -9,7 +9,8 @@ return [
     
     // Stats
     'stats' => [
-        'total_clicks' => 'Clics totaux',
+        'total_clicks'  => 'Clics uniques',
+        'unique_clicks' => 'Clics uniques',
         'total_referrals' => 'Parrainages totaux',
         'successful_referrals' => 'Conversions',
         'conversion_rate' => 'Taux de conversion',
@@ -73,11 +74,16 @@ return [
     ],
     
     // Commission
-    'commission_description' => 'Commission pour la facture #:id',
+    'commission_description'       => 'Commission pour la facture #:id',
+    'commission_click_description' => 'Commission par clic unique',
 
     // Settings labels
-    'settings_first_order_only'      => 'Commission sur la 1ère commande uniquement',
-    'settings_first_order_only_help' => 'Si activé, une seule commission est générée par client parrainé.',
+    'settings_first_order_only'           => 'Commission sur la 1ère commande uniquement',
+    'settings_first_order_only_help'      => 'Si activé, une seule commission est générée par client parrainé.',
+    'settings_click_remuneration'         => 'Rémunérer les clics uniques',
+    'settings_click_remuneration_help'    => 'Si activé, chaque clic unique sur un lien d\'affiliation génère une commission.',
+    'settings_click_remuneration_rate'    => 'Montant par clic unique',
+    'settings_click_remuneration_rate_help' => 'Montant fixe attribué à l\'affilié pour chaque nouveau visiteur unique.',
 
     // Emails
     'emails' => [

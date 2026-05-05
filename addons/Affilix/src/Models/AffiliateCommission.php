@@ -20,6 +20,7 @@ class AffiliateCommission extends Model
         'invoice_id',
         'amount',
         'commission_rate',
+        'type',
         'description',
         'status',
         'approved_at',

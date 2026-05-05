@@ -24,7 +24,15 @@ addons/
 php artisan migrate
 ```
 
-Cela crée les 5 tables nécessaires : `affiliates`, `referrals`, `affiliate_commissions`, `affiliate_clicks`, `affiliation_settings`.
+Cela crée les 5 tables de base ainsi que la migration de mise à jour (`000006`) :
+
+| Table | Rôle |
+|---|---|
+| `affiliates` | Comptes affiliés |
+| `referrals` | Parrainages (inscription filleul) |
+| `affiliate_commissions` | Commissions (ventes et clics) |
+| `affiliate_clicks` | Historique des clics avec déduplication IP |
+| `affiliation_settings` | Paramètres globaux |
 
 ### 3. Vider le cache
 
@@ -46,7 +54,10 @@ Rendez-vous sur **Admin > Paramètres > Affiliation** pour configurer :
 | Durée du cookie | 30 jours | Durée de mémorisation d'un clic sur le lien |
 | Approbation automatique des affiliés | Oui | Activer/désactiver la validation manuelle |
 | Approbation automatique des commissions | Non | Les commissions doivent être approuvées manuellement |
+| Commission sur 1ère commande uniquement | Non | Limite à une seule commission par filleul |
 | Méthodes de paiement | Balance, PayPal, Virement | Méthodes proposées aux affiliés |
+| **Rémunérer les clics uniques** | Non | Générer une commission à chaque nouveau visiteur unique |
+| **Montant par clic unique** | 0.00 | Montant fixe crédité pour chaque clic unique (ex : 0.05 €) |
 
 ## Utilisation
 
@@ -87,10 +98,37 @@ Les permissions suivantes sont disponibles pour les rôles admin :
 
 ## Fonctionnement technique
 
-- **Suivi des clics** : Un cookie est posé lors d'un clic sur `/ref/CODE`, valable selon la durée configurée
-- **Création de parrainage** : À l'inscription (`Illuminate\Auth\Events\Registered`), le cookie est lu et un `Referral` est créé
-- **Création de commission** : À chaque facture complétée (`App\Events\Core\Invoice\InvoiceCompleted`), une commission est générée si le client a un parrainage actif ou si le cookie est encore présent
-- **Utilisateurs existants** : Si un client déjà inscrit clique sur un lien puis achète, la commission est quand même créée via le cookie de session
+### Suivi des clics (déduplication par IP)
+
+Chaque clic sur `/ref/CODE` est enregistré dans `affiliate_clicks` avec le champ `is_unique` :
+
+- **Premier clic** d'une IP pour cet affilié → `is_unique = true`, incrémente `unique_clicks` sur l'affilié
+- **Clics suivants** de la même IP → `is_unique = false`, enregistrés pour les analytics mais exclus des statistiques et des commissions
+
+Le cookie de parrainage est posé à chaque clic (unique ou non), afin que le lien reste actif.
+
+Le dashboard client et l'espace admin affichent les **clics uniques** (une IP = un clic), pas le volume brut.
+
+### Rémunération par clic unique
+
+Si l'option est activée dans les paramètres admin, une commission de type `click` est automatiquement créée pour chaque clic unique :
+
+- Le montant est fixe (configuré dans les paramètres, ex : `0.05 €`)
+- La commission suit le même workflow d'approbation que les commissions de vente (manuelle ou automatique selon le paramètre `auto_approve_commissions`)
+- Elle apparaît dans le tableau des commissions avec le label **Clic** à la place du client parrainé
+- Elle est compatible avec les méthodes de paiement existantes (balance, PayPal, virement)
+
+### Création de parrainage
+
+À l'inscription (`Illuminate\Auth\Events\Registered`), le cookie est lu et un `Referral` est créé.
+
+### Création de commission sur vente
+
+À chaque facture complétée (`App\Events\Core\Invoice\InvoiceCompleted`), une commission de type `sale` est générée si le client a un parrainage actif ou si le cookie est encore présent.
+
+### Utilisateurs existants
+
+Si un client déjà inscrit clique sur un lien puis achète, la commission est quand même créée via le cookie de session.
 
 ## Données collectées — RGPD
 
@@ -105,7 +143,7 @@ Cet addon traite des données à caractère personnel. L'opérateur du site est 
 | `affiliates` | Identifiant client, méthode de paiement, coordonnées PayPal ou bancaires | Gestion du programme et versement des commissions | Durée de la relation contractuelle + 5 ans (archivage comptable) |
 | `referrals` | Identifiant du filleul, date d'inscription, date du premier achat | Attribution des commissions et suivi des conversions | Durée du contrat affilié + 1 an |
 | `affiliate_commissions` | Montants, référence de paiement, horodatages | Traçabilité comptable des versements | 10 ans (obligation légale de conservation des pièces comptables) |
-| `affiliate_clicks` | Adresse IP, user agent, code de parrainage, URL visitée | Statistiques de performance (clics par affilié) | 1 an |
+| `affiliate_clicks` | Adresse IP, user agent, code de parrainage, URL visitée, indicateur d'unicité | Statistiques de performance et déduplication des clics | 1 an |
 
 ### Cookie de suivi
 

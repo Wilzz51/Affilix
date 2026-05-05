@@ -5,9 +5,11 @@ namespace App\Addons\Affiliation\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Addons\Affiliation\Models\Affiliate;
 use App\Addons\Affiliation\Models\AffiliateClick;
+use App\Addons\Affiliation\Models\AffiliateCommission;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cookie;
+use Illuminate\Support\Facades\DB;
 
 class AffiliateController extends Controller
 {
@@ -25,7 +27,8 @@ class AffiliateController extends Controller
         }
 
         $stats = [
-            'total_clicks'        => $affiliate->clicks()->count(),
+            'total_clicks'        => $affiliate->unique_clicks,
+            'unique_clicks'       => $affiliate->unique_clicks,
             'total_referrals'     => $affiliate->total_referrals,
             'successful_referrals'=> $affiliate->successful_referrals,
             'conversion_rate'     => $affiliate->getConversionRate(),
@@ -179,12 +182,50 @@ class AffiliateController extends Controller
             return redirect('/');
         }
 
-        AffiliateClick::trackClick($affiliate);
+        $click = AffiliateClick::trackClick($affiliate);
+
+        if ($click->is_unique) {
+            $this->createClickCommission($affiliate);
+        }
 
         $lifetime = (int) affiliation_setting('cookie_lifetime', 30);
         session(['referral_code' => $code]);
         Cookie::queue('referral_code', $code, $lifetime * 24 * 60);
 
         return redirect('/');
+    }
+
+    private function createClickCommission(Affiliate $affiliate): void
+    {
+        if (affiliation_setting('click_remuneration_enabled', '0') !== '1') {
+            return;
+        }
+
+        $rate = (float) affiliation_setting('click_remuneration_rate', 0);
+        if ($rate <= 0) {
+            return;
+        }
+
+        $autoApprove = affiliation_setting('auto_approve_commissions', '0') === '1';
+        $status = $autoApprove ? 'approved' : 'pending';
+
+        DB::transaction(function () use ($affiliate, $rate, $status, $autoApprove) {
+            AffiliateCommission::create([
+                'affiliate_id'    => $affiliate->id,
+                'referral_id'     => null,
+                'invoice_id'      => null,
+                'amount'          => $rate,
+                'commission_rate' => 0,
+                'type'            => 'click',
+                'description'     => __('Affilix::affiliation.commission_click_description'),
+                'status'          => $status,
+            ]);
+
+            $affiliate->increment('total_earnings', $rate);
+
+            if ($autoApprove) {
+                $affiliate->increment('pending_earnings', $rate);
+            }
+        });
     }
 }
