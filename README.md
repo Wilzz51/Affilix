@@ -6,7 +6,7 @@ Complete referral &amp; commission system for ClientXCMS
 
 Système d'affiliation complet pour ClientXCMS : codes de parrainage, suivi des clics, commissions automatiques et tableau de bord affilié.
 
-![Affilix Logo](https://files.sx-heberg.fr/api/shares/p9GLROGl/files/eb18cd39-7949-45d2-b599-9ead8288dca6?download=false)
+![Affilix Logo](https://files.sx-heberg.fr/api/shares/4EX4U7HA/files/84b799ba-6e3c-43bc-8d2a-ddddc308871a?download=false)
 
 ## Prérequis
 
@@ -79,7 +79,7 @@ Gérez le programme depuis **Admin > Affiliation** :
 - **Commissions** — Approbation et paiement en lot (avec référence de paiement)
 - **Paramètres** — Configuration globale du programme
 
-![Affilix Logo](https://files.sx-heberg.fr/api/shares/Dr6Y26jr/files/5a546e1b-c929-4f25-8e16-31d23c8417a8?download=false)
+![Affilix Logo](https://files.sx-heberg.fr/api/shares/PHBLejED/files/fd9ba3f5-149c-46bc-85cb-ad59695a73f1?download=false)
 
 ### Paiement par balance
 
