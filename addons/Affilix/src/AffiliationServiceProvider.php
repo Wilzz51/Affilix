@@ -67,8 +67,7 @@ class AffiliationServiceProvider extends BaseAddonServiceProvider
             'Affilix::affiliation.admin.manage_affiliates',
             5,
             null,
-            true,
-            1
+            true
         );
 
         $this->app['settings']->addCardItem(
