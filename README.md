@@ -1,6 +1,10 @@
 # Addon Affilix — ClientXCMS
 
+![Affilix Logo](https://files.sx-heberg.fr/api/shares/PFp8opb5/files/041ce383-d121-4654-b672-807968c51efd?download=false)
+
 Système d'affiliation complet pour ClientXCMS : codes de parrainage, suivi des clics, commissions automatiques et tableau de bord affilié.
+
+![Affilix](https://files.sx-heberg.fr/api/shares/1CteLw8f/files/e274bd85-2428-427a-aa2a-338e3d343786?download=false)
 
 ## Prérequis
 
@@ -28,6 +32,9 @@ php artisan view:clear
 L'addon se charge automatiquement via le système de ServiceProvider de ClientXCMS — aucune autre configuration n'est requise.
 
 ## Configuration
+
+![Affilix](https://files.sx-heberg.fr/api/shares/1CteLw8f/files/0e0bc696-8a81-4cf0-bb94-56c39f754bf3?download=false)
+![Affilix](https://files.sx-heberg.fr/api/shares/1CteLw8f/files/4d879058-1dac-48aa-9e9d-3c0ebff2a1e1?download=false)
 
 Rendez-vous sur **Admin > Paramètres > Affiliation** pour configurer :
 
@@ -57,11 +64,15 @@ Le lien de parrainage a la forme : `https://votresite.com/ref/CODE`
 
 ### Espace admin
 
+![Affilix](https://files.sx-heberg.fr/api/shares/1CteLw8f/files/24485e88-89f1-4edf-a154-45d6cb303e33?download=false)
+
 Gérez le programme depuis **Admin > Affiliation** :
 
 - **Affiliés** — Liste, approbation, modification du taux, suspension
 - **Commissions** — Approbation et paiement en lot (avec référence de paiement)
 - **Paramètres** — Configuration globale du programme
+
+![Affilix](https://files.sx-heberg.fr/api/shares/1CteLw8f/files/99bfc4f2-1853-4d79-a569-4c645fcc3467?download=false)
 
 ### Commande artisan `affilix:auto-pay`
 
