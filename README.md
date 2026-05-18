@@ -23,9 +23,10 @@ addons/
 └── Affilix/
 ```
 
-### 3. Vider le cache
+### 3. Compiler les assets et vider le cache
 
-```
+```bash
+npm run build
 php artisan cache:clear
 php artisan view:clear
 ```
