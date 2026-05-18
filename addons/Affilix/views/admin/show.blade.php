@@ -47,6 +47,14 @@
         <span>{{ session('success') }}</span>
     </div>
 @endif
+@if($errors->any())
+    <div class="rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 p-4 mb-5 text-sm text-red-700 dark:text-red-300 flex gap-2.5">
+        <i class="bi bi-exclamation-circle-fill mt-0.5 shrink-0"></i>
+        <ul class="list-disc list-inside space-y-0.5">
+            @foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach
+        </ul>
+    </div>
+@endif
 
 {{-- Fiche + stats activité --}}
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
@@ -180,6 +188,34 @@
     </div>
 </div>
 
+{{-- Graphiques --}}
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+    <div class="card">
+        <div class="card-heading">
+            <div class="flex items-center gap-2">
+                <i class="bi bi-cursor text-gray-400 dark:text-gray-500"></i>
+                <h4>{{ __('Clics / semaine') }}</h4>
+            </div>
+            <span class="text-xs text-gray-400 dark:text-gray-500 ml-auto">{{ __('8 dernières semaines') }}</span>
+        </div>
+        <div class="card-body">
+            <canvas id="clicks-chart" height="160"></canvas>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-heading">
+            <div class="flex items-center gap-2">
+                <i class="bi bi-cash-stack text-gray-400 dark:text-gray-500"></i>
+                <h4>{{ __('Commissions / mois') }}</h4>
+            </div>
+            <span class="text-xs text-gray-400 dark:text-gray-500 ml-auto">{{ __('6 derniers mois') }}</span>
+        </div>
+        <div class="card-body">
+            <canvas id="commissions-chart" height="160"></canvas>
+        </div>
+    </div>
+</div>
+
 {{-- Commissions --}}
 <div class="card mb-4">
     <div class="card-heading">
@@ -187,15 +223,19 @@
             <i class="bi bi-cash-stack text-gray-400 dark:text-gray-500"></i>
             <h4>{{ __('Affilix::affiliation.commissions') }}</h4>
         </div>
+        <button type="button" onclick="document.getElementById('modal-commission').classList.remove('hidden')"
+            class="btn btn-sm btn-primary shrink-0">
+            <i class="bi bi-plus-lg mr-1"></i>{{ __('Créer une commission') }}
+        </button>
     </div>
     <div class="overflow-x-auto">
-        <table class="table">
+        <table class="table w-full table-fixed">
             <thead>
                 <tr>
-                    <th class="px-5 py-3">{{ __('Date') }}</th>
-                    <th class="px-5 py-3">{{ __('Facture') }}</th>
-                    <th class="px-5 py-3 text-right">{{ __('Montant') }}</th>
-                    <th class="px-5 py-3">{{ __('Statut') }}</th>
+                    <th class="px-5 py-3 w-1/4 text-left">{{ __('Date') }}</th>
+                    <th class="px-5 py-3 w-1/4 text-left">{{ __('Facture') }}</th>
+                    <th class="px-5 py-3 w-1/4 text-right">{{ __('Montant') }}</th>
+                    <th class="px-5 py-3 w-1/4 text-left">{{ __('Statut') }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -262,13 +302,13 @@
         </div>
     </div>
     <div class="overflow-x-auto">
-        <table class="table">
+        <table class="table w-full table-fixed">
             <thead>
                 <tr>
-                    <th class="px-5 py-3">{{ __('Client parrainé') }}</th>
-                    <th class="px-5 py-3">{{ __('Inscrit le') }}</th>
-                    <th class="px-5 py-3">{{ __('Premier achat') }}</th>
-                    <th class="px-5 py-3">{{ __('Statut') }}</th>
+                    <th class="px-5 py-3 w-2/5 text-left">{{ __('Client parrainé') }}</th>
+                    <th class="px-5 py-3 w-1/5 text-left">{{ __('Inscrit le') }}</th>
+                    <th class="px-5 py-3 w-1/5 text-left">{{ __('Premier achat') }}</th>
+                    <th class="px-5 py-3 w-1/5 text-left">{{ __('Statut') }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -331,4 +371,114 @@
 </div>
 
 </div>
+
+{{-- Modal commission manuelle --}}
+<div id="modal-commission" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/50">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md mx-4 p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-base font-semibold text-gray-900 dark:text-white">{{ __('Créer une commission manuelle') }}</h3>
+            <button type="button" onclick="document.getElementById('modal-commission').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                <i class="bi bi-x-lg text-lg"></i>
+            </button>
+        </div>
+        <form method="POST" action="{{ route('affiliation.admin.commission.create', $affiliate) }}">
+            @csrf
+            <div class="space-y-4">
+                <div>
+                    <label class="text-xs font-medium text-gray-700 dark:text-gray-300 block mb-1.5">
+                        {{ __('Montant') }} <span class="text-red-500">*</span>
+                    </label>
+                    <div class="flex items-center gap-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg px-3 h-9">
+                        <input type="number" name="amount" min="0.01" step="0.01" required placeholder="0.00"
+                            class="bg-transparent text-sm text-gray-900 dark:text-white border-0 outline-none ring-0 focus:outline-none focus:ring-0 flex-1 text-right">
+                        <span class="text-sm text-gray-400 dark:text-gray-500 shrink-0">{{ setting('currency_symbol', '€') }}</span>
+                    </div>
+                </div>
+                <div>
+                    <label class="text-xs font-medium text-gray-700 dark:text-gray-300 block mb-1.5">
+                        {{ __('Description') }} <span class="text-red-500">*</span>
+                    </label>
+                    <input type="text" name="description" required maxlength="255"
+                        placeholder="{{ __('Ex : Bonus parrainage campagne été') }}"
+                        class="w-full rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-sm text-gray-900 dark:text-white px-3 py-2 focus:outline-none focus:ring-1 focus:ring-primary">
+                </div>
+                <p class="text-xs text-gray-400 dark:text-gray-500 flex items-center gap-1">
+                    <i class="bi bi-info-circle text-[11px]"></i>
+                    @if(setting('auto_approve_commissions', '0') === '1')
+                        {{ __('La commission sera automatiquement approuvée.') }}
+                    @else
+                        {{ __('La commission sera créée en statut "En attente" et devra être approuvée.') }}
+                    @endif
+                </p>
+            </div>
+            <div class="flex gap-3 justify-end mt-5">
+                <button type="button" onclick="document.getElementById('modal-commission').classList.add('hidden')" class="btn btn-secondary btn-sm">{{ __('Annuler') }}</button>
+                <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-check-lg mr-1"></i>{{ __('Créer') }}</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+<script>
+(function () {
+    const dark      = document.documentElement.classList.contains('dark');
+    const textColor = dark ? '#9ca3af' : '#6b7280';
+    const gridColor = dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+
+    const axes = {
+        x: { grid: { color: gridColor }, ticks: { color: textColor, font: { size: 11 } } },
+        y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: textColor, font: { size: 11 } } },
+    };
+
+    new Chart(document.getElementById('clicks-chart'), {
+        type: 'bar',
+        data: {
+            labels: @json($clicksChart->pluck('label')),
+            datasets: [{
+                data: @json($clicksChart->pluck('count')),
+                backgroundColor: 'rgba(59,130,246,0.65)',
+                borderColor: 'rgba(59,130,246,1)',
+                borderWidth: 1,
+                borderRadius: 4,
+            }],
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: axes,
+        },
+    });
+
+    const currency = '{{ setting("currency_symbol", "€") }}';
+    new Chart(document.getElementById('commissions-chart'), {
+        type: 'bar',
+        data: {
+            labels: @json($commissionsChart->pluck('label')),
+            datasets: [{
+                data: @json($commissionsChart->pluck('total')),
+                backgroundColor: 'rgba(34,197,94,0.65)',
+                borderColor: 'rgba(34,197,94,1)',
+                borderWidth: 1,
+                borderRadius: 4,
+            }],
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: axes.x,
+                y: {
+                    ...axes.y,
+                    ticks: { ...axes.y.ticks, callback: v => v + ' ' + currency },
+                },
+            },
+        },
+    });
+})();
+
+document.getElementById('modal-commission').addEventListener('click', function (e) {
+    if (e.target === this) this.classList.add('hidden');
+});
+</script>
 @endsection

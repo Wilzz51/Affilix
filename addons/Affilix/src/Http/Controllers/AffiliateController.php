@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Addons\Affiliation\Models\Affiliate;
 use App\Addons\Affiliation\Models\AffiliateClick;
 use App\Addons\Affiliation\Models\AffiliateCommission;
+use App\Addons\Affiliation\Models\AffiliateWithdrawal;
 use App\Addons\Affiliation\Models\AffiliationSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -50,11 +51,57 @@ class AffiliateController extends Controller
             ->take(10)
             ->get();
 
+        // Clics par semaine (8 dernières semaines) — 1 requête
+        $clicksRaw = $affiliate->clicks()
+            ->where('created_at', '>=', now()->subWeeks(8)->startOfWeek())
+            ->get(['created_at']);
+
+        $clicksChart = collect(range(7, 0))->map(function ($i) use ($clicksRaw) {
+            $start = now()->subWeeks($i)->startOfWeek();
+            $end   = now()->subWeeks($i)->endOfWeek();
+            return [
+                'label' => $start->format('d/m'),
+                'count' => $clicksRaw->filter(fn($c) => $c->created_at->between($start, $end))->count(),
+            ];
+        });
+
+        // Commissions par mois (6 derniers mois) — 1 requête
+        $commissionsRaw = $affiliate->commissions()
+            ->where('created_at', '>=', now()->subMonths(6)->startOfMonth())
+            ->whereNotIn('status', ['cancelled'])
+            ->get(['created_at', 'amount']);
+
+        $commissionsChart = collect(range(5, 0))->map(function ($i) use ($commissionsRaw) {
+            $start = now()->subMonths($i)->startOfMonth();
+            $end   = now()->subMonths($i)->endOfMonth();
+            return [
+                'label' => $start->format('M'),
+                'total' => (float) $commissionsRaw->filter(fn($c) => $c->created_at->between($start, $end))->sum('amount'),
+            ];
+        });
+
+        // Taux de rémunération au clic effectif (null = pas activé)
+        $clickRate = null;
+        if ($affiliate->click_remuneration_enabled !== null) {
+            if ($affiliate->click_remuneration_enabled) {
+                $clickRate = (float) ($affiliate->click_remuneration_rate
+                    ?? AffiliationSetting::get('click_remuneration_rate', '0'));
+            }
+        } elseif (AffiliationSetting::get('click_remuneration_enabled', '0') === '1') {
+            $clickRate = (float) AffiliationSetting::get('click_remuneration_rate', '0');
+        }
+        if ($clickRate !== null && $clickRate <= 0) {
+            $clickRate = null;
+        }
+
         return view('Affilix::dashboard', compact(
             'affiliate',
             'stats',
             'recentCommissions',
-            'recentReferrals'
+            'recentReferrals',
+            'clicksChart',
+            'commissionsChart',
+            'clickRate'
         ));
     }
 
@@ -173,6 +220,61 @@ class AffiliateController extends Controller
             ->with('success', __('Affilix::affiliation.messages.settings_updated'));
     }
 
+    public function requestWithdrawal(Request $request)
+    {
+        $affiliate = $this->getAffiliate();
+        if (!$affiliate) {
+            return redirect()->route('affiliation.register');
+        }
+
+        $error = DB::transaction(function () use ($affiliate) {
+            $fresh = Affiliate::lockForUpdate()->find($affiliate->id);
+
+            if ($fresh->withdrawals()->where('status', 'pending')->exists()) {
+                return __('Vous avez déjà une demande de paiement en cours.');
+            }
+
+            $amount    = (float) $fresh->pending_earnings;
+            $minPayout = (float) setting('minimum_payout', 0);
+
+            if ($amount <= 0) {
+                return __('Aucun gain approuvé disponible.');
+            }
+
+            if ($amount < $minPayout) {
+                return __('Le montant minimum de retrait est de') . ' ' . number_format($minPayout, 2) . ' ' . setting('currency_symbol', '€') . '.';
+            }
+
+            AffiliateWithdrawal::create([
+                'affiliate_id'    => $fresh->id,
+                'amount'          => $amount,
+                'payment_method'  => $fresh->payment_method,
+                'payment_details' => $fresh->payment_details,
+                'status'          => 'pending',
+            ]);
+
+            return null;
+        });
+
+        if ($error) {
+            return redirect()->back()->with('error', $error);
+        }
+
+        return redirect()->back()->with('success', __('Votre demande de paiement a bien été envoyée.'));
+    }
+
+    public function withdrawalHistory()
+    {
+        $affiliate = $this->getAffiliate();
+        if (!$affiliate) {
+            return redirect()->route('affiliation.register');
+        }
+
+        $withdrawals = $affiliate->withdrawals()->latest()->paginate(20);
+
+        return view('Affilix::withdrawals', compact('affiliate', 'withdrawals'));
+    }
+
     public function trackClick(Request $request, string $code)
     {
         $affiliate = Affiliate::where('referral_code', $code)
@@ -198,11 +300,21 @@ class AffiliateController extends Controller
 
     private function createClickCommission(Affiliate $affiliate): void
     {
-        if (AffiliationSetting::get('click_remuneration_enabled', '0') !== '1') {
-            return;
+        // Per-affiliate override takes priority over global setting
+        if ($affiliate->click_remuneration_enabled !== null) {
+            if (!$affiliate->click_remuneration_enabled) {
+                return;
+            }
+            $rate = $affiliate->click_remuneration_rate !== null
+                ? (float) $affiliate->click_remuneration_rate
+                : (float) AffiliationSetting::get('click_remuneration_rate', '0');
+        } else {
+            if (AffiliationSetting::get('click_remuneration_enabled', '0') !== '1') {
+                return;
+            }
+            $rate = (float) AffiliationSetting::get('click_remuneration_rate', '0');
         }
 
-        $rate = (float) AffiliationSetting::get('click_remuneration_rate', '0');
         if ($rate <= 0) {
             return;
         }

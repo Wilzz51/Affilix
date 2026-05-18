@@ -87,7 +87,7 @@ class AffiliateCommission extends Model
     /**
      * Marquer comme payée
      */
-    public function markAsPaid(string $reference = null): void
+    public function markAsPaid(?string $reference = null, bool $notify = true): void
     {
         DB::transaction(function () use ($reference) {
             $this->update([
@@ -109,6 +109,10 @@ class AffiliateCommission extends Model
                 }
             }
         });
+
+        if (!$notify) {
+            return;
+        }
 
         try {
             Mail::to($this->affiliate->customer->email)->send(new CommissionPaid($this));

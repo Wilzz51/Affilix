@@ -25,4 +25,6 @@ Route::middleware(['auth'])->prefix('affiliation')->group(function () {
     Route::get('/referrals', [AffiliateController::class, 'referrals'])->name('referrals');
     Route::get('/settings', [AffiliateController::class, 'settings'])->name('settings');
     Route::put('/settings', [AffiliateController::class, 'updateSettings'])->name('settings.update');
+    Route::post('/withdraw', [AffiliateController::class, 'requestWithdrawal'])->name('withdraw');
+    Route::get('/withdrawals', [AffiliateController::class, 'withdrawalHistory'])->name('withdrawals');
 });

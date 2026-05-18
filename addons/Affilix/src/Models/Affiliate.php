@@ -14,6 +14,8 @@ class Affiliate extends Model
         'customer_id',
         'referral_code',
         'commission_rate',
+        'click_remuneration_enabled',
+        'click_remuneration_rate',
         'total_earnings',
         'pending_earnings',
         'paid_earnings',
@@ -27,12 +29,14 @@ class Affiliate extends Model
     ];
 
     protected $casts = [
-        'commission_rate' => 'decimal:2',
-        'total_earnings' => 'decimal:2',
-        'pending_earnings' => 'decimal:2',
-        'paid_earnings' => 'decimal:2',
-        'payment_details' => 'array',
-        'approved_at' => 'datetime',
+        'commission_rate'          => 'decimal:2',
+        'click_remuneration_enabled' => 'boolean',
+        'click_remuneration_rate'  => 'decimal:4',
+        'total_earnings'           => 'decimal:2',
+        'pending_earnings'         => 'decimal:2',
+        'paid_earnings'            => 'decimal:2',
+        'payment_details'          => 'array',
+        'approved_at'              => 'datetime',
     ];
 
     /**
@@ -65,6 +69,11 @@ class Affiliate extends Model
     public function clicks(): HasMany
     {
         return $this->hasMany(AffiliateClick::class);
+    }
+
+    public function withdrawals(): HasMany
+    {
+        return $this->hasMany(AffiliateWithdrawal::class);
     }
 
     /**

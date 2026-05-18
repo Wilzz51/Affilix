@@ -24,15 +24,16 @@ addons/
 php artisan migrate
 ```
 
-Cela crée les 5 tables de base ainsi que la migration de mise à jour (`000006`) :
+Cela crée toutes les tables nécessaires :
 
 | Table | Rôle |
 |---|---|
 | `affiliates` | Comptes affiliés |
 | `referrals` | Parrainages (inscription filleul) |
-| `affiliate_commissions` | Commissions (ventes et clics) |
+| `affiliate_commissions` | Commissions (ventes, clics et manuelles) |
 | `affiliate_clicks` | Historique des clics avec déduplication IP |
 | `affiliation_settings` | Paramètres globaux |
+| `affiliate_withdrawals` | Demandes de retrait (paiement) |
 
 ### 3. Vider le cache
 
@@ -78,6 +79,32 @@ Gérez le programme depuis **Admin > Affiliation** :
 - **Affiliés** — Liste, approbation, modification du taux, suspension
 - **Commissions** — Approbation et paiement en lot (avec référence de paiement)
 - **Paramètres** — Configuration globale du programme
+
+### Commande artisan `affilix:auto-pay`
+
+L'addon inclut une commande artisan pour déclencher le paiement automatique des affiliés éligibles :
+
+```bash
+php artisan affilix:auto-pay
+```
+
+Elle est enregistrée automatiquement dans le scheduler Laravel et s'exécute chaque jour à **06h00**. La commande interne gère la fréquence (quotidienne ou mensuelle) selon les paramètres configurés dans **Admin > Paramètres > Affiliation > Paiement automatique**.
+
+**Conditions de déclenchement pour chaque affilié :**
+- Statut `active`
+- Méthode de paiement `balance` (seule méthode supportée en automatique)
+- Solde approuvé (`pending_earnings`) ≥ seuil configuré
+- Aucune demande de retrait déjà en cours
+
+#### Configuration sur Plesk
+
+La fréquence (quotidienne ou mensuelle) se configure dans **Admin > Paramètres > Affiliation > Paiement automatique**. Il n'est **pas nécessaire** de modifier le cron Plesk si vous changez ce paramètre — le scheduler Laravel lit la configuration à chaque exécution et décide lui-même si la commande doit tourner.
+
+C'est le scheduler Laravel qui se charge de déclencher `affilix:auto-pay` au bon moment (06h00 chaque jour, ou uniquement le 1er du mois si la fréquence est "Mensuel").
+
+> Le paiement automatique crédite directement le solde du compte client (méthode **Balance**). Pour les méthodes PayPal ou virement bancaire, les paiements restent manuels depuis **Admin > Affiliation > Retraits**.
+
+---
 
 ### Paiement par balance
 

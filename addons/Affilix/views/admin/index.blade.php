@@ -74,9 +74,38 @@
 {{-- Tableau --}}
 <div class="card">
     <form action="{{ route('affiliation.admin.index') }}" method="GET" id="filter-form">
+        {{-- Conserver le tri actif lors d'une recherche --}}
+        @if(request('sort'))<input type="hidden" name="sort" value="{{ request('sort') }}">@endif
+        @if(request('direction'))<input type="hidden" name="direction" value="{{ request('direction') }}">@endif
+
         <div class="card-heading flex-wrap gap-y-3">
             <h4>{{ __('Affilix::affiliation.admin.affiliates') }}</h4>
             <div class="flex flex-wrap items-center gap-3 ml-auto">
+
+                {{-- Bulk actions --}}
+                <span id="selection-badge" class="hidden text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2.5 py-1.5 rounded-lg whitespace-nowrap">
+                    <span id="selection-count">0</span> {{ __('sélectionné(s)') }}
+                </span>
+                <button type="button" id="btn-activate" onclick="submitBulk('activate')"
+                    class="btn btn-sm btn-secondary opacity-40 cursor-not-allowed" disabled>
+                    <i class="bi bi-check-circle mr-1 text-green-500"></i>{{ __('Activer') }}
+                </button>
+                <button type="button" id="btn-suspend" onclick="submitBulk('suspend')"
+                    class="btn btn-sm btn-secondary opacity-40 cursor-not-allowed" disabled>
+                    <i class="bi bi-pause-circle mr-1 text-orange-500"></i>{{ __('Suspendre') }}
+                </button>
+                <button type="button" id="btn-delete" onclick="confirmBulkDelete()"
+                    class="btn btn-sm btn-secondary opacity-40 cursor-not-allowed" disabled>
+                    <i class="bi bi-trash mr-1 text-red-500"></i>{{ __('Supprimer') }}
+                </button>
+                <div class="h-5 w-px bg-gray-200 dark:bg-gray-600"></div>
+
+                {{-- Export CSV --}}
+                <a href="{{ route('affiliation.admin.export', request()->only(['search', 'status'])) }}"
+                    class="btn btn-secondary btn-sm" title="{{ __('Exporter en CSV') }}">
+                    <i class="bi bi-download mr-1"></i>{{ __('Export CSV') }}
+                </a>
+
                 <div class="flex items-center gap-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg px-3 h-9 w-56">
                     <i class="bi bi-search text-gray-400 text-xs shrink-0"></i>
                     <input type="text" name="search" id="search-input"
@@ -108,17 +137,55 @@
         </div>
     </form>
 
+    @php
+        $sortUrl = fn(string $col) => request()->fullUrlWithQuery([
+            'sort'      => $col,
+            'direction' => ($sort === $col && $direction === 'asc') ? 'desc' : 'asc',
+            'page'      => 1,
+        ]);
+        $sortIcon = fn(string $col) => $sort !== $col
+            ? 'bi-arrow-down-up text-gray-300 dark:text-gray-600'
+            : ($direction === 'asc' ? 'bi-arrow-up text-primary' : 'bi-arrow-down text-primary');
+    @endphp
+
+    <form id="bulk-form" method="POST" action="{{ route('affiliation.admin.bulk') }}">
+    @csrf
+    <input type="hidden" name="action" id="bulk-action" value="">
     <div class="overflow-x-auto">
-        <table class="table">
+        <table class="table w-full">
             <thead>
                 <tr>
+                    <th class="px-5 py-3 w-10">
+                        <input type="checkbox" id="check-all" class="rounded cursor-pointer">
+                    </th>
                     <th class="px-5 py-3">{{ __('Client') }}</th>
                     <th class="px-5 py-3">{{ __('Code') }}</th>
                     <th class="px-5 py-3 text-center">{{ __('Taux') }}</th>
-                    <th class="px-5 py-3 text-center">{{ __('Parrainages') }}</th>
-                    <th class="px-5 py-3 text-right">{{ __('Gains') }}</th>
+                    <th class="px-5 py-3 text-center">
+                        <a href="{{ $sortUrl('unique_clicks') }}" class="inline-flex items-center gap-1 hover:text-primary transition-colors">
+                            {{ __('Clics') }}
+                            <i class="bi {{ $sortIcon('unique_clicks') }} text-xs"></i>
+                        </a>
+                    </th>
+                    <th class="px-5 py-3 text-center">
+                        <a href="{{ $sortUrl('total_referrals') }}" class="inline-flex items-center gap-1 hover:text-primary transition-colors">
+                            {{ __('Parrainages') }}
+                            <i class="bi {{ $sortIcon('total_referrals') }} text-xs"></i>
+                        </a>
+                    </th>
+                    <th class="px-5 py-3 text-right">
+                        <a href="{{ $sortUrl('total_earnings') }}" class="inline-flex items-center justify-end gap-1 hover:text-primary transition-colors">
+                            {{ __('Gains') }}
+                            <i class="bi {{ $sortIcon('total_earnings') }} text-xs"></i>
+                        </a>
+                    </th>
                     <th class="px-5 py-3">{{ __('Statut') }}</th>
-                    <th class="px-5 py-3">{{ __('Depuis') }}</th>
+                    <th class="px-5 py-3">
+                        <a href="{{ $sortUrl('created_at') }}" class="inline-flex items-center gap-1 hover:text-primary transition-colors">
+                            {{ __('Depuis') }}
+                            <i class="bi {{ $sortIcon('created_at') }} text-xs"></i>
+                        </a>
+                    </th>
                     <th class="px-5 py-3"></th>
                 </tr>
             </thead>
@@ -126,12 +193,16 @@
                 @forelse($affiliates as $affiliate)
                 <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
                     <td class="px-5 py-4">
+                        <input type="checkbox" name="affiliate_ids[]" value="{{ $affiliate->id }}"
+                            class="affiliate-checkbox rounded cursor-pointer">
+                    </td>
+                    <td class="px-5 py-4">
                         <div class="flex items-center gap-3">
                             <div class="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0 text-xs font-bold text-primary">
                                 {{ strtoupper(substr($affiliate->customer->firstname ?? $affiliate->customer->name ?? '?', 0, 1)) }}
                             </div>
                             <div class="min-w-0">
-                                <a href="{{ url('/admin/customers/' . $affiliate->customer_id) }}"
+                                <a href="{{ url(admin_prefix() . '/customers/' . $affiliate->customer_id) }}"
                                     class="text-sm font-medium text-primary hover:underline block truncate max-w-[180px]">
                                     {{ $affiliate->customer->firstname ?? '' }} {{ $affiliate->customer->lastname ?? ($affiliate->customer->name ?? '—') }}
                                 </a>
@@ -143,10 +214,24 @@
                         <code class="text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-1 rounded-md font-mono tracking-wider whitespace-nowrap">{{ $affiliate->referral_code }}</code>
                     </td>
                     <td class="px-5 py-4 text-sm font-medium text-center text-gray-700 dark:text-gray-300">{{ number_format($affiliate->commission_rate, 0) }}%</td>
-                    <td class="px-5 py-4 text-sm text-center text-gray-700 dark:text-gray-300">{{ number_format($affiliate->total_referrals) }}</td>
+                    <td class="px-5 py-4 text-sm text-center text-gray-700 dark:text-gray-300">
+                        {{ number_format($affiliate->unique_clicks) }}
+                    </td>
+                    <td class="px-5 py-4 text-sm text-center text-gray-700 dark:text-gray-300">
+                        {{ number_format($affiliate->total_referrals) }}
+                        @if($affiliate->successful_referrals > 0)
+                            <span class="block text-xs text-green-500 dark:text-green-400">{{ number_format($affiliate->successful_referrals) }} conv.</span>
+                        @endif
+                    </td>
                     <td class="px-5 py-4 text-right whitespace-nowrap">
                         <span class="text-sm font-bold text-gray-900 dark:text-white">{{ number_format($affiliate->total_earnings, 2) }}</span>
                         <span class="text-xs text-gray-500 dark:text-gray-400 ml-0.5">{{ setting('currency_symbol', '€') }}</span>
+                        <span class="block text-xs text-gray-400 dark:text-gray-500 mt-0.5">
+                            <span class="text-yellow-500">{{ number_format($affiliate->pending_earnings, 2) }}</span>
+                            {{ __('att.') }} &middot;
+                            <span class="text-green-500">{{ number_format($affiliate->paid_earnings, 2) }}</span>
+                            {{ __('payé') }}
+                        </span>
                     </td>
                     <td class="px-5 py-4">
                         @if($affiliate->status === 'active')
@@ -179,7 +264,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="8">
+                    <td colspan="10">
                         <div class="flex flex-col items-center justify-center gap-3 py-16 w-full">
                             <div class="h-16 w-16 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
                                 <i class="bi bi-people text-3xl text-gray-300 dark:text-gray-600"></i>
@@ -197,6 +282,7 @@
             </tbody>
         </table>
     </div>
+    </form>
 
     @if($affiliates->hasPages())
     <div class="px-6 py-3 border-t border-gray-100 dark:border-gray-700">
@@ -205,6 +291,36 @@
     @endif
 </div>
 
+</div>
+
+{{-- Modal confirmation suppression --}}
+<div id="delete-modal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 w-full max-w-md">
+        <div class="flex items-start gap-4 mb-4">
+            <div class="h-11 w-11 rounded-xl bg-red-100 dark:bg-red-900/30 flex items-center justify-center shrink-0">
+                <i class="bi bi-trash text-red-600 dark:text-red-400 text-xl"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+                <h3 class="text-base font-semibold text-gray-900 dark:text-white">{{ __('Supprimer des affiliés') }}</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+                    <span id="delete-modal-count" class="font-semibold text-gray-700 dark:text-gray-300">0</span>
+                    {{ __('affilié(s) seront supprimés.') }}
+                </p>
+            </div>
+        </div>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mb-5 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800 rounded-lg px-4 py-3">
+            <i class="bi bi-exclamation-triangle text-red-500 mr-1.5"></i>
+            {{ __('Cette action est irréversible. Les commissions associées seront conservées.') }}
+        </p>
+        <div class="flex justify-end gap-2 pt-4 border-t border-gray-100 dark:border-gray-700">
+            <button type="button" onclick="document.getElementById('delete-modal').classList.add('hidden')"
+                class="btn btn-secondary">{{ __('Annuler') }}</button>
+            <button type="button" onclick="submitBulk('delete')"
+                class="btn btn-primary" style="background:#dc2626;border-color:#dc2626;">
+                <i class="bi bi-trash mr-1"></i>{{ __('Supprimer') }}
+            </button>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -219,6 +335,64 @@ document.querySelectorAll('input[name="status"]').forEach(radio => {
     input.addEventListener('input', function () {
         clearTimeout(timer);
         timer = setTimeout(() => this.closest('form').submit(), 400);
+    });
+})();
+
+(function () {
+    const checkAll    = document.getElementById('check-all');
+    const badge       = document.getElementById('selection-badge');
+    const countEl     = document.getElementById('selection-count');
+    const btnActivate = document.getElementById('btn-activate');
+    const btnSuspend  = document.getElementById('btn-suspend');
+    const btnDelete   = document.getElementById('btn-delete');
+
+    function getCheckboxes() { return document.querySelectorAll('.affiliate-checkbox'); }
+    function getChecked()    { return document.querySelectorAll('.affiliate-checkbox:checked'); }
+
+    function setEnabled(btn, enabled) {
+        if (enabled) {
+            btn.removeAttribute('disabled');
+            btn.classList.remove('opacity-40', 'cursor-not-allowed');
+        } else {
+            btn.setAttribute('disabled', '');
+            btn.classList.add('opacity-40', 'cursor-not-allowed');
+        }
+    }
+
+    function updateUI() {
+        const n   = getChecked().length;
+        const all = getCheckboxes().length;
+        countEl.textContent = n;
+        badge.classList.toggle('hidden', n === 0);
+        [btnActivate, btnSuspend, btnDelete].forEach(btn => setEnabled(btn, n > 0));
+        checkAll.indeterminate = n > 0 && n < all;
+        checkAll.checked       = all > 0 && n === all;
+    }
+
+    checkAll.addEventListener('change', function () {
+        getCheckboxes().forEach(cb => cb.checked = this.checked);
+        updateUI();
+    });
+
+    document.addEventListener('change', function (e) {
+        if (e.target.classList.contains('affiliate-checkbox')) updateUI();
+    });
+
+    window.submitBulk = function (action) {
+        if (getChecked().length === 0) return;
+        document.getElementById('delete-modal').classList.add('hidden');
+        document.getElementById('bulk-action').value = action;
+        document.getElementById('bulk-form').submit();
+    };
+
+    window.confirmBulkDelete = function () {
+        if (getChecked().length === 0) return;
+        document.getElementById('delete-modal-count').textContent = getChecked().length;
+        document.getElementById('delete-modal').classList.remove('hidden');
+    };
+
+    document.getElementById('delete-modal').addEventListener('click', function (e) {
+        if (e.target === this) this.classList.add('hidden');
     });
 })();
 </script>

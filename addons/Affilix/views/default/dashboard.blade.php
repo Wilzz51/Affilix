@@ -67,6 +67,12 @@
                 <i class="bi bi-clipboard mr-1"></i>{{ __('Affilix::affiliation.copy_link') }}
             </button>
         </div>
+        @if($clickRate !== null)
+        <p class="mt-2 text-xs text-blue-600 dark:text-blue-400 flex items-center gap-1.5">
+            <i class="bi bi-cursor-fill text-[11px]"></i>
+            {{ __('Vous gagnez') }} <strong>{{ number_format($clickRate, 2) }} {{ setting('currency_symbol', '€') }}</strong> {{ __('par clic unique sur votre lien.') }}
+        </p>
+        @endif
     </div>
 </div>
 
@@ -147,6 +153,86 @@
     </div>
 </div>
 
+{{-- Demande de paiement --}}
+@php
+    $pendingWithdrawal = $affiliate->withdrawals()->where('status', 'pending')->first();
+    $minPayout = (float) setting('minimum_payout', 0);
+    $approvedBalance = (float) $stats['pending_earnings'];
+    $canRequest = !$pendingWithdrawal && $approvedBalance > 0 && $approvedBalance >= $minPayout;
+@endphp
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="flex items-center justify-between gap-4 flex-wrap">
+            <div class="flex items-center gap-3">
+                <div class="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                    <i class="bi bi-wallet2 text-primary"></i>
+                </div>
+                <div>
+                    <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ __('Solde disponible') }}</p>
+                    <p class="text-xl font-bold text-primary">{{ number_format($approvedBalance, 2) }} {{ setting('currency_symbol', '€') }}</p>
+                    @if($minPayout > 0 && $approvedBalance < $minPayout && !$pendingWithdrawal)
+                        <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
+                            {{ __('Minimum :') }} {{ number_format($minPayout, 2) }} {{ setting('currency_symbol', '€') }}
+                            — {{ __('encore') }} {{ number_format($minPayout - $approvedBalance, 2) }} {{ setting('currency_symbol', '€') }}
+                        </p>
+                    @endif
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                @if($pendingWithdrawal)
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400">
+                        <i class="bi bi-hourglass-split text-[11px]"></i>
+                        {{ __('Demande en cours') }} — {{ number_format($pendingWithdrawal->amount, 2) }} {{ setting('currency_symbol', '€') }}
+                    </span>
+                @elseif($canRequest)
+                    <form method="POST" action="{{ route('affiliation.withdraw') }}" onsubmit="return confirm('{{ __('Confirmer la demande de paiement de') }} {{ number_format($approvedBalance, 2) }} {{ setting('currency_symbol', '€') }} ?')">
+                        @csrf
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-send mr-1.5"></i>{{ __('Demander le paiement') }}
+                        </button>
+                    </form>
+                @elseif($approvedBalance <= 0)
+                    <span class="text-sm text-gray-400 dark:text-gray-500">{{ __('Aucun solde approuvé') }}</span>
+                @endif
+                <a href="{{ route('affiliation.withdrawals') }}" class="btn btn-secondary btn-sm">
+                    <i class="bi bi-clock-history mr-1"></i>{{ __('Historique') }}
+                </a>
+            </div>
+        </div>
+        @if(session('error'))
+            <p class="mt-3 text-sm text-red-600 dark:text-red-400 flex items-center gap-1.5">
+                <i class="bi bi-exclamation-circle text-[13px]"></i>{{ session('error') }}
+            </p>
+        @endif
+    </div>
+</div>
+
+{{-- Graphiques --}}
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+    <div class="card">
+        <div class="card-heading">
+            <div class="flex items-center gap-2">
+                <i class="bi bi-cursor text-gray-400 dark:text-gray-500 text-sm"></i>
+                <h4 class="text-sm">{{ __('Clics uniques — 8 dernières semaines') }}</h4>
+            </div>
+        </div>
+        <div class="card-body pt-2">
+            <canvas id="client-clicks-chart" height="140"></canvas>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-heading">
+            <div class="flex items-center gap-2">
+                <i class="bi bi-graph-up text-gray-400 dark:text-gray-500 text-sm"></i>
+                <h4 class="text-sm">{{ __('Gains — 6 derniers mois') }}</h4>
+            </div>
+        </div>
+        <div class="card-body pt-2">
+            <canvas id="client-commissions-chart" height="140"></canvas>
+        </div>
+    </div>
+</div>
+
 {{-- Dernières commissions --}}
 <div class="card">
     <div class="card-heading">
@@ -202,6 +288,7 @@
 
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
 <script>
 function copyLink(btn) {
     const val = document.getElementById('referral-link').value;
@@ -214,5 +301,67 @@ function copyLink(btn) {
     btn.innerHTML = '<i class="bi bi-clipboard-check mr-1"></i>{{ __("Copié !") }}';
     setTimeout(() => btn.innerHTML = orig, 2000);
 }
+
+(function () {
+    const dark      = document.documentElement.classList.contains('dark');
+    const textColor = dark ? '#9ca3af' : '#6b7280';
+    const gridColor = dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+
+    const baseOpts = {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: { legend: { display: false } },
+        scales: {
+            x: { ticks: { color: textColor, font: { size: 11 } }, grid: { color: gridColor } },
+            y: { ticks: { color: textColor, font: { size: 11 } }, grid: { color: gridColor }, beginAtZero: true },
+        },
+    };
+
+    // Clics
+    const clicksData = @json($clicksChart);
+    new Chart(document.getElementById('client-clicks-chart'), {
+        type: 'bar',
+        data: {
+            labels: clicksData.map(d => d.label),
+            datasets: [{
+                data: clicksData.map(d => d.count),
+                backgroundColor: 'rgba(59,130,246,0.65)',
+                borderColor: 'rgba(59,130,246,1)',
+                borderWidth: 1,
+                borderRadius: 4,
+            }],
+        },
+        options: baseOpts,
+    });
+
+    // Commissions
+    const commData = @json($commissionsChart);
+    new Chart(document.getElementById('client-commissions-chart'), {
+        type: 'bar',
+        data: {
+            labels: commData.map(d => d.label),
+            datasets: [{
+                data: commData.map(d => d.total),
+                backgroundColor: 'rgba(34,197,94,0.65)',
+                borderColor: 'rgba(34,197,94,1)',
+                borderWidth: 1,
+                borderRadius: 4,
+            }],
+        },
+        options: {
+            ...baseOpts,
+            scales: {
+                ...baseOpts.scales,
+                y: {
+                    ...baseOpts.scales.y,
+                    ticks: {
+                        ...baseOpts.scales.y.ticks,
+                        callback: v => v.toFixed(2) + ' {{ setting('currency_symbol', '€') }}',
+                    },
+                },
+            },
+        },
+    });
+})();
 </script>
 @endsection

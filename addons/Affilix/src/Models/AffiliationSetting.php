@@ -54,6 +54,7 @@ class AffiliationSetting extends Model
             'default_commission_rate', 'auto_approve', 'auto_approve_commissions',
             'minimum_payout', 'cookie_lifetime',
             'click_remuneration_enabled', 'click_remuneration_rate',
+            'auto_payment_enabled', 'auto_payment_frequency', 'auto_payment_threshold',
         ];
         foreach ($keys as $key) {
             Cache::forget("affiliation_setting_{$key}");

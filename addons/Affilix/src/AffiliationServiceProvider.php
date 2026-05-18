@@ -4,11 +4,13 @@ namespace App\Addons\Affiliation;
 
 use App\Extensions\BaseAddonServiceProvider;
 use App\Addons\Affiliation\Http\Controllers\Admin\AdminAffiliateController;
+use App\Addons\Affiliation\Console\ProcessAutoPayments;
 use App\Addons\Affiliation\Listeners\TrackReferralRegistration;
 use App\Addons\Affiliation\Listeners\CreateAffiliateCommission;
 use App\Core\Menu\FrontMenuItem;
 use Illuminate\Auth\Events\Registered;
 use App\Events\Core\Invoice\InvoiceCompleted;
+use Illuminate\Console\Scheduling\Schedule;
 
 class AffiliationServiceProvider extends BaseAddonServiceProvider
 {
@@ -45,6 +47,15 @@ class AffiliationServiceProvider extends BaseAddonServiceProvider
                 require addon_path($this->uuid, 'routes/web.php');
             });
 
+        // Commande artisan + scheduler
+        $this->commands([ProcessAutoPayments::class]);
+
+        $this->app->booted(function () {
+            $this->app->make(Schedule::class)
+                ->command('affilix:auto-pay')
+                ->dailyAt('06:00');
+        });
+
         // Listeners d'événements
         $this->app['events']->listen(Registered::class, TrackReferralRegistration::class);
         $this->app['events']->listen(InvoiceCompleted::class, CreateAffiliateCommission::class);
@@ -74,7 +85,7 @@ class AffiliationServiceProvider extends BaseAddonServiceProvider
             'Affilix',
             'affiliation_settings',
             'Affilix::affiliation.settings',
-            'Affilix::affiliation.admin.manage_affiliates',
+            'Affilix::affiliation.admin.settings_description',
             'bi bi-sliders',
             [AdminAffiliateController::class, 'settings'],
             'admin.manage_settings'
@@ -84,7 +95,7 @@ class AffiliationServiceProvider extends BaseAddonServiceProvider
             'Affilix',
             'affiliation_affiliates',
             'Affilix::affiliation.admin.affiliates',
-            'Affilix::affiliation.admin.manage_affiliates',
+            'Affilix::affiliation.admin.affiliates_description',
             'bi bi-people-fill',
             [AdminAffiliateController::class, 'index'],
             'admin.show_customers'
@@ -94,7 +105,7 @@ class AffiliationServiceProvider extends BaseAddonServiceProvider
             'Affilix',
             'affiliation_commissions',
             'Affilix::affiliation.commissions',
-            'Affilix::affiliation.admin.pending_commissions',
+            'Affilix::affiliation.admin.commissions_description',
             'bi bi-cash-stack',
             [AdminAffiliateController::class, 'commissions'],
             'admin.show_customers'

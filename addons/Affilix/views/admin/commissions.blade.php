@@ -14,6 +14,17 @@
         <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{{ __('Gérez et traitez les commissions de vos affiliés') }}</p>
     </div>
     <div class="flex gap-2">
+        <a href="{{ route('affiliation.admin.commissions.export', request()->only(['status', 'affiliate_id', 'date_from', 'date_to'])) }}"
+            class="btn btn-secondary btn-sm" title="{{ __('Exporter en CSV') }}">
+            <i class="bi bi-download mr-1"></i>{{ __('Export CSV') }}
+        </a>
+        <a href="{{ route('affiliation.admin.withdrawals') }}" class="btn btn-secondary btn-sm">
+            <i class="bi bi-wallet2 mr-1"></i>{{ __('Retraits') }}
+            @php $pendingCount = \App\Addons\Affiliation\Models\AffiliateWithdrawal::where('status','pending')->count(); @endphp
+            @if($pendingCount > 0)
+                <span class="ml-1 inline-flex items-center justify-center h-4 min-w-[1rem] px-1 rounded-full text-[10px] font-bold bg-red-500 text-white">{{ $pendingCount }}</span>
+            @endif
+        </a>
         <a href="{{ route('affiliation.admin.index') }}" class="btn btn-secondary btn-sm">
             <i class="bi bi-people mr-1"></i>{{ __('Affilix::affiliation.admin.affiliates') }}
         </a>
@@ -68,15 +79,12 @@
 </div>
 
 {{-- Table + bulk actions --}}
-<form id="commissions-form" method="POST">
-@csrf
-
 <div class="card">
     <div class="card-heading flex-wrap gap-y-3">
         {{-- Status filter tabs --}}
         @php $currentStatus = request('status', ''); @endphp
         <div class="flex items-center gap-1 flex-wrap">
-            @foreach(['' => __('Tous'), 'pending' => __('Affilix::affiliation.pending'), 'approved' => __('Affilix::affiliation.approved'), 'paid' => __('Affilix::affiliation.paid')] as $value => $label)
+            @foreach(['' => __('Tous'), 'pending' => __('Affilix::affiliation.pending'), 'approved' => __('Affilix::affiliation.approved'), 'paid' => __('Affilix::affiliation.paid'), 'cancelled' => __('Annulée')] as $value => $label)
                 <a href="{{ request()->fullUrlWithQuery(['status' => $value, 'page' => 1]) }}"
                     class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors
                         {{ $currentStatus === $value
@@ -105,20 +113,77 @@
         </div>
     </div>
 
+    {{-- Filtres avancés --}}
+    <form method="GET" action="{{ route('affiliation.admin.commissions') }}"
+          class="flex items-center gap-2 px-4 py-2.5 border-b border-gray-100 dark:border-gray-700 overflow-x-auto">
+            <input type="hidden" name="status" value="{{ request('status') }}">
+
+            {{-- Affilié --}}
+            <div class="flex items-center bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg px-3 h-9 gap-2 shrink-0">
+                <i class="bi bi-person text-gray-400 text-sm shrink-0"></i>
+                <select name="affiliate_id"
+                    class="bg-transparent text-sm text-gray-700 dark:text-gray-200 border-0 outline-none ring-0 focus:outline-none focus:ring-0 w-[150px] cursor-pointer">
+                    <option value="">{{ __('Tous les affiliés') }}</option>
+                    @foreach($affiliates as $aff)
+                        <option value="{{ $aff->id }}" {{ request('affiliate_id') == $aff->id ? 'selected' : '' }}>
+                            {{ trim(($aff->customer->firstname ?? '') . ' ' . ($aff->customer->lastname ?? ($aff->customer->name ?? ''))) ?: '#' . $aff->id }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            {{-- Plage de dates --}}
+            <div class="flex items-center bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg px-3 h-9 gap-2 shrink-0">
+                <i class="bi bi-calendar3 text-gray-400 text-xs shrink-0"></i>
+                <input type="date" name="date_from" value="{{ request('date_from') }}"
+                    class="bg-transparent text-sm text-gray-700 dark:text-gray-200 border-0 outline-none ring-0 focus:outline-none focus:ring-0 w-[115px] cursor-pointer">
+                <span class="text-gray-300 dark:text-gray-600 text-xs shrink-0">–</span>
+                <input type="date" name="date_to" value="{{ request('date_to') }}"
+                    class="bg-transparent text-sm text-gray-700 dark:text-gray-200 border-0 outline-none ring-0 focus:outline-none focus:ring-0 w-[115px] cursor-pointer">
+            </div>
+
+            {{-- Raccourcis période --}}
+            <div class="flex items-center gap-1 bg-gray-100 dark:bg-gray-700/60 rounded-lg p-1 shrink-0">
+                <button type="button" onclick="setThisMonth()"
+                    class="px-3 py-1 text-xs font-medium rounded-md transition-colors text-gray-500 dark:text-gray-400
+                           hover:bg-white dark:hover:bg-gray-600 hover:text-gray-800 dark:hover:text-white hover:shadow-sm">
+                    {{ __('Ce mois') }}
+                </button>
+                <button type="button" onclick="setLastMonth()"
+                    class="px-3 py-1 text-xs font-medium rounded-md transition-colors text-gray-500 dark:text-gray-400
+                           hover:bg-white dark:hover:bg-gray-600 hover:text-gray-800 dark:hover:text-white hover:shadow-sm">
+                    {{ __('Mois préc.') }}
+                </button>
+            </div>
+
+            {{-- Actions --}}
+            <button type="submit" class="btn btn-sm btn-primary shrink-0">
+                <i class="bi bi-funnel-fill mr-1 text-[11px]"></i>{{ __('Filtrer') }}
+            </button>
+            @if(request('affiliate_id') || request('date_from') || request('date_to'))
+            <a href="{{ route('affiliation.admin.commissions', array_filter(['status' => request('status')])) }}"
+                class="text-xs text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors flex items-center gap-0.5 shrink-0">
+                <i class="bi bi-x-circle text-sm"></i>{{ __('Réinitialiser') }}
+            </a>
+            @endif
+    </form>
+
+    <form id="commissions-form" method="POST">
+    @csrf
     <div class="overflow-x-auto">
-        <table class="table">
+        <table class="table w-full table-fixed">
             <thead>
                 <tr>
                     <th class="px-4 py-3 w-10">
                         <input type="checkbox" id="check-all" class="rounded cursor-pointer">
                     </th>
-                    <th class="px-4 py-3">{{ __('Date') }}</th>
-                    <th class="px-4 py-3">{{ __('Affilié') }}</th>
-                    <th class="px-4 py-3">{{ __('Affilix::affiliation.customer') }}</th>
-                    <th class="px-4 py-3">{{ __('Affilix::affiliation.invoice') }}</th>
-                    <th class="px-4 py-3 text-right">{{ __('Affilix::affiliation.amount') }}</th>
-                    <th class="px-4 py-3 text-center">{{ __('Taux') }}</th>
-                    <th class="px-4 py-3">{{ __('Affilix::affiliation.status') }}</th>
+                    <th class="px-4 py-3 w-[13%] text-left">{{ __('Date') }}</th>
+                    <th class="px-4 py-3 w-[18%] text-left">{{ __('Affilié') }}</th>
+                    <th class="px-4 py-3 w-[18%] text-left">{{ __('Affilix::affiliation.customer') }}</th>
+                    <th class="px-4 py-3 w-[10%] text-left">{{ __('Affilix::affiliation.invoice') }}</th>
+                    <th class="px-4 py-3 w-[14%] text-right">{{ __('Affilix::affiliation.amount') }}</th>
+                    <th class="px-4 py-3 w-[10%] text-center">{{ __('Taux') }}</th>
+                    <th class="px-4 py-3 w-[17%] text-left">{{ __('Affilix::affiliation.status') }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -150,8 +215,8 @@
                         @endif
                     </td>
                     <td class="px-4 py-3">
-                        @if($commission->invoice)
-                            <span class="font-mono text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded-md">#{{ $commission->invoice_id }}</span>
+                        @if($commission->invoice_id)
+                            <span class="font-mono text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded-md whitespace-nowrap">#{{ $commission->invoice_id }}</span>
                         @else
                             <span class="text-gray-400">—</span>
                         @endif
@@ -181,10 +246,28 @@
                             @if($commission->approved_at)
                                 <span class="block text-xs text-gray-400 dark:text-gray-500 mt-0.5">{{ $commission->approved_at->format('d/m/Y') }}</span>
                             @endif
+                            <form method="POST" action="{{ route('affiliation.admin.commissions.cancel', $commission) }}" class="mt-1"
+                                onsubmit="return confirm('{{ __('Annuler cette commission ?') }}')">
+                                @csrf
+                                <button type="submit" class="text-xs text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-colors flex items-center gap-0.5">
+                                    <i class="bi bi-x-circle text-[11px]"></i>{{ __('Annuler') }}
+                                </button>
+                            </form>
+                        @elseif($commission->status === 'cancelled')
+                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 whitespace-nowrap">
+                                <i class="bi bi-circle-fill text-[6px]"></i>{{ __('Annulée') }}
+                            </span>
                         @else
                             <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400 whitespace-nowrap">
                                 <i class="bi bi-circle-fill text-[6px]"></i>{{ __('Affilix::affiliation.pending') }}
                             </span>
+                            <form method="POST" action="{{ route('affiliation.admin.commissions.cancel', $commission) }}" class="mt-1"
+                                onsubmit="return confirm('{{ __('Annuler cette commission ?') }}')">
+                                @csrf
+                                <button type="submit" class="text-xs text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-colors flex items-center gap-0.5">
+                                    <i class="bi bi-x-circle text-[11px]"></i>{{ __('Annuler') }}
+                                </button>
+                            </form>
                         @endif
                     </td>
                 </tr>
@@ -214,8 +297,8 @@
         {{ $commissions->links('admin.shared.layouts.pagination') }}
     </div>
     @endif
+    </form>
 </div>
-</form>
 
 {{-- Payment modal --}}
 <div id="pay-modal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
@@ -256,6 +339,22 @@
 </div>
 
 <script>
+function setThisMonth() {
+    const now = new Date();
+    const y = now.getFullYear(), m = String(now.getMonth() + 1).padStart(2, '0');
+    const last = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+    document.querySelector('[name=date_from]').value = y + '-' + m + '-01';
+    document.querySelector('[name=date_to]').value   = y + '-' + m + '-' + String(last).padStart(2, '0');
+}
+function setLastMonth() {
+    const now   = new Date();
+    const first = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const last  = new Date(now.getFullYear(), now.getMonth(), 0);
+    const pad = n => String(n).padStart(2, '0');
+    document.querySelector('[name=date_from]').value = first.getFullYear() + '-' + pad(first.getMonth() + 1) + '-01';
+    document.querySelector('[name=date_to]').value   = last.getFullYear()  + '-' + pad(last.getMonth()  + 1) + '-' + pad(last.getDate());
+}
+
 (function () {
     const checkAll    = document.getElementById('check-all');
     const badge       = document.getElementById('selection-badge');
