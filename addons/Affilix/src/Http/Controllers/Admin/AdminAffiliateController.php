@@ -4,14 +4,63 @@ namespace App\Addons\Affiliation\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Addons\Affiliation\Models\Affiliate;
+use App\Addons\Affiliation\Models\AffiliateClick;
 use App\Addons\Affiliation\Models\AffiliateCommission;
 use App\Addons\Affiliation\Models\AffiliateWithdrawal;
 use App\Addons\Affiliation\Models\AffiliationSetting;
+use App\Addons\Affiliation\Models\Referral;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class AdminAffiliateController extends Controller
 {
+    /**
+     * Tableau de bord global
+     */
+    public function dashboard()
+    {
+        $currency = setting('currency_symbol', '€');
+
+        $topAffiliates = Affiliate::with('customer')
+            ->orderByDesc('total_earnings')
+            ->limit(5)
+            ->get();
+
+        $totalAffiliates  = Affiliate::count();
+        $activeAffiliates = Affiliate::where('status', 'active')->count();
+        $totalClicks      = AffiliateClick::where('is_unique', true)->count();
+        $totalReferrals   = Referral::count();
+        $totalConversions = Referral::where('status', 'converted')->count();
+        $conversionRate   = $totalReferrals > 0 ? round(($totalConversions / $totalReferrals) * 100, 1) : 0;
+        $totalPaid        = AffiliateCommission::where('status', 'paid')->sum('amount');
+        $totalPending     = AffiliateCommission::where('status', 'approved')->sum('amount');
+
+        $commissionsRaw = AffiliateCommission::where('created_at', '>=', now()->subMonths(6)->startOfMonth())
+            ->whereNotIn('status', ['cancelled'])
+            ->get(['created_at', 'amount', 'status']);
+
+        $monthlyChart = collect(range(5, 0))->map(function ($i) use ($commissionsRaw) {
+            $start = now()->subMonths($i)->startOfMonth();
+            $end   = now()->subMonths($i)->endOfMonth();
+            $slice = $commissionsRaw->filter(fn($c) => $c->created_at->between($start, $end));
+            return [
+                'label' => $start->translatedFormat('M'),
+                'total' => (float) $slice->sum('amount'),
+                'paid'  => (float) $slice->where('status', 'paid')->sum('amount'),
+            ];
+        });
+
+        $paymentMethods = Affiliate::select('payment_method', DB::raw('count(*) as total'))
+            ->groupBy('payment_method')
+            ->pluck('total', 'payment_method');
+
+        return view('Affilix_admin::dashboard', compact(
+            'topAffiliates', 'totalAffiliates', 'activeAffiliates',
+            'totalClicks', 'conversionRate', 'totalPaid', 'totalPending',
+            'monthlyChart', 'paymentMethods', 'currency'
+        ));
+    }
+
     /**
      * Liste des affiliés
      */
@@ -236,12 +285,13 @@ class AdminAffiliateController extends Controller
     public function update(Request $request, Affiliate $affiliate)
     {
         $request->validate([
-            'commission_rate'      => 'required|numeric|min:0|max:100',
-            'status'               => 'required|in:active,inactive,suspended',
+            'commission_rate'         => 'required|numeric|min:0|max:100',
+            'status'                  => 'required|in:active,inactive,suspended',
             'click_remuneration_rate' => 'nullable|numeric|min:0|max:999999',
+            'notes'                   => 'nullable|string|max:2000',
         ]);
 
-        $data = $request->only(['commission_rate', 'status']);
+        $data = $request->only(['commission_rate', 'status', 'notes']);
 
         if ($request->status === 'active' && $affiliate->status !== 'active') {
             $data['approved_at'] = now();

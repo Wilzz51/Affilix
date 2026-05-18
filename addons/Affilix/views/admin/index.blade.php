@@ -14,6 +14,9 @@
         <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{{ __('Suivez les performances et gérez vos affiliés') }}</p>
     </div>
     <div class="flex gap-2">
+        <a href="{{ route('affiliation.admin.dashboard') }}" class="btn btn-secondary btn-sm">
+            <i class="bi bi-graph-up-arrow mr-1"></i>{{ __('Dashboard') }}
+        </a>
         <a href="{{ route('affiliation.admin.commissions') }}" class="btn btn-secondary btn-sm">
             <i class="bi bi-cash-stack mr-1"></i>{{ __('Commissions') }}
         </a>

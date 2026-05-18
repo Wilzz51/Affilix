@@ -34,10 +34,12 @@ Cela crée toutes les tables nécessaires :
 | `affiliate_clicks` | Historique des clics avec déduplication IP |
 | `affiliation_settings` | Paramètres globaux |
 | `affiliate_withdrawals` | Demandes de retrait (paiement) |
+| `affiliates.notes` | Notes internes admin (colonne ajoutée) |
 
-### 3. Vider le cache
+### 3. Compiler les assets et vider le cache
 
-```
+```bash
+npm run build
 php artisan cache:clear
 php artisan view:clear
 ```

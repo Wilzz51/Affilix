@@ -26,6 +26,7 @@ class Affiliate extends Model
         'payment_method',
         'payment_details',
         'approved_at',
+        'notes',
     ];
 
     protected $casts = [

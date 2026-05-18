@@ -316,6 +316,19 @@
 
                 </div>
 
+                {{-- Notes internes --}}
+                <div class="px-5 py-5">
+                    <div class="mb-2">
+                        <p class="text-sm font-medium text-gray-900 dark:text-white flex items-center gap-1.5">
+                            <i class="bi bi-sticky text-gray-400 dark:text-gray-500"></i>{{ __('Notes internes') }}
+                        </p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ __('Visible uniquement par les administrateurs.') }}</p>
+                    </div>
+                    <textarea name="notes" rows="3"
+                        placeholder="{{ __('Remarques, contexte, historique…') }}"
+                        class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl px-4 py-3 text-sm text-gray-800 dark:text-gray-200 placeholder-gray-400 outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary resize-none transition">{{ old('notes', $affiliate->notes) }}</textarea>
+                </div>
+
                 <div class="flex justify-end gap-3 px-5 py-4 border-t border-gray-100 dark:border-gray-700">
                     <a href="{{ route('affiliation.admin.show', $affiliate) }}" class="btn btn-secondary">{{ __('Annuler') }}</a>
                     <button type="submit" class="btn btn-primary">

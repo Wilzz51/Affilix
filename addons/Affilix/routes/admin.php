@@ -12,6 +12,9 @@ use App\Addons\Affiliation\Http\Controllers\Admin\AdminAffiliateController;
 | Middlewares automatiques : web, admin
 */
 
+// Tableau de bord global
+Route::get('/dashboard', [AdminAffiliateController::class, 'dashboard'])->name('dashboard');
+
 // Paramètres
 Route::get('/settings', [AdminAffiliateController::class, 'settings'])->name('settings');
 Route::put('/settings', [AdminAffiliateController::class, 'updateSettings'])->name('settings.update');

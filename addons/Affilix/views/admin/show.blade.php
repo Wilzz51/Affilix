@@ -151,6 +151,24 @@
     </div>
 </div>
 
+{{-- Notes internes --}}
+@if($affiliate->notes)
+<div class="card mb-4">
+    <div class="card-heading">
+        <div class="flex items-center gap-2">
+            <i class="bi bi-sticky-fill text-yellow-400 dark:text-yellow-500 text-sm"></i>
+            <h4 class="text-sm">{{ __('Notes internes') }}</h4>
+        </div>
+        <a href="{{ route('affiliation.admin.edit', $affiliate) }}" class="btn btn-secondary btn-sm ml-auto">
+            <i class="bi bi-pencil text-xs mr-1"></i>{{ __('Modifier') }}
+        </a>
+    </div>
+    <div class="px-5 py-4">
+        <p class="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-line">{{ $affiliate->notes }}</p>
+    </div>
+</div>
+@endif
+
 {{-- Gains --}}
 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
     <div class="card" style="border-left: 4px solid #6b7280;">
