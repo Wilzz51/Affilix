@@ -1,12 +1,6 @@
-# Affilix
-Complete referral &amp; commission system for ClientXCMS
-![Affilix Logo](https://files.sx-heberg.fr/api/shares/PFp8opb5/files/041ce383-d121-4654-b672-807968c51efd?download=false)
-
 # Addon Affilix — ClientXCMS
 
 Système d'affiliation complet pour ClientXCMS : codes de parrainage, suivi des clics, commissions automatiques et tableau de bord affilié.
-
-![Affilix Logo](https://files.sx-heberg.fr/api/shares/4EX4U7HA/files/84b799ba-6e3c-43bc-8d2a-ddddc308871a?download=false)
 
 ## Prérequis
 
@@ -24,21 +18,7 @@ addons/
 └── Affilix/
 ```
 
-### 2. Exécuter les migrations
-
-```
-php artisan migrate
-```
-
-Cela crée les 5 tables nécessaires : `affiliates`, `referrals`, `affiliate_commissions`, `affiliate_clicks`, `affiliation_settings`.
-
-### 3. Compiler les assets
-
-```
-npm run build
-```
-
-### 4. Vider le cache
+### 3. Vider le cache
 
 ```
 php artisan cache:clear
@@ -75,8 +55,6 @@ Les clients accèdent à leur espace affiliation via le menu **Affiliation** dan
 
 Le lien de parrainage a la forme : `https://votresite.com/ref/CODE`
 
-![Affilix Logo](https://files.sx-heberg.fr/api/shares/UC3jvPzk/files/23f12398-3463-442c-a9b2-a0a49d3365ea?download=false)
-
 ### Espace admin
 
 Gérez le programme depuis **Admin > Affiliation** :
@@ -85,7 +63,31 @@ Gérez le programme depuis **Admin > Affiliation** :
 - **Commissions** — Approbation et paiement en lot (avec référence de paiement)
 - **Paramètres** — Configuration globale du programme
 
-![Affilix Logo](https://files.sx-heberg.fr/api/shares/PHBLejED/files/fd9ba3f5-149c-46bc-85cb-ad59695a73f1?download=false)
+### Commande artisan `affilix:auto-pay`
+
+L'addon inclut une commande artisan pour déclencher le paiement automatique des affiliés éligibles :
+
+```bash
+php artisan affilix:auto-pay
+```
+
+Elle est enregistrée automatiquement dans le scheduler Laravel et s'exécute chaque jour à **06h00**. La commande interne gère la fréquence (quotidienne ou mensuelle) selon les paramètres configurés dans **Admin > Paramètres > Affiliation > Paiement automatique**.
+
+**Conditions de déclenchement pour chaque affilié :**
+- Statut `active`
+- Méthode de paiement `balance` (seule méthode supportée en automatique)
+- Solde approuvé (`pending_earnings`) ≥ seuil configuré
+- Aucune demande de retrait déjà en cours
+
+#### Configuration sur Plesk
+
+La fréquence (quotidienne ou mensuelle) se configure dans **Admin > Paramètres > Affiliation > Paiement automatique**. Il n'est **pas nécessaire** de modifier le cron Plesk si vous changez ce paramètre — le scheduler Laravel lit la configuration à chaque exécution et décide lui-même si la commande doit tourner.
+
+C'est le scheduler Laravel qui se charge de déclencher `affilix:auto-pay` au bon moment (06h00 chaque jour, ou uniquement le 1er du mois si la fréquence est "Mensuel").
+
+> Le paiement automatique crédite directement le solde du compte client (méthode **Balance**). Pour les méthodes PayPal ou virement bancaire, les paiements restent manuels depuis **Admin > Affiliation > Retraits**.
+
+---
 
 ### Paiement par balance
 
@@ -151,7 +153,7 @@ Cet addon traite des données à caractère personnel. L'opérateur du site est 
 | `affiliates` | Identifiant client, méthode de paiement, coordonnées PayPal ou bancaires | Gestion du programme et versement des commissions | Durée de la relation contractuelle + 5 ans (archivage comptable) |
 | `referrals` | Identifiant du filleul, date d'inscription, date du premier achat | Attribution des commissions et suivi des conversions | Durée du contrat affilié + 1 an |
 | `affiliate_commissions` | Montants, référence de paiement, horodatages | Traçabilité comptable des versements | 10 ans (obligation légale de conservation des pièces comptables) |
-| `affiliate_clicks` | Adresse IP, user agent, code de parrainage, URL visitée | Statistiques de performance (clics par affilié) | 1 an |
+| `affiliate_clicks` | Adresse IP, user agent, code de parrainage, URL visitée, indicateur d'unicité | Statistiques de performance et déduplication des clics | 1 an |
 
 ### Cookie de suivi
 
@@ -177,4 +179,4 @@ L'addon applique les mesures de minimisation suivantes, sans que celles-ci const
 - Le nom de famille des filleuls est masqué dans l'interface affilié (`Prénom I.`) afin de limiter l'exposition des données entre utilisateurs
 - L'accès aux données complètes est restreint à l'interface d'administration
 
-.
+
