@@ -1,7 +1,8 @@
-# Addon Affilix — ClientXCMS
-
+# Affilix
+Complete referral &amp; commission system for ClientXCMS
 ![Affilix Logo](https://files.sx-heberg.fr/api/shares/PFp8opb5/files/041ce383-d121-4654-b672-807968c51efd?download=false)
 
+# Addon Affilix — ClientXCMS
 Système d'affiliation complet pour ClientXCMS : codes de parrainage, suivi des clics, commissions automatiques et tableau de bord affilié.
 
 ![Affilix](https://files.sx-heberg.fr/api/shares/1CteLw8f/files/e274bd85-2428-427a-aa2a-338e3d343786?download=false)
@@ -99,6 +100,7 @@ C'est le scheduler Laravel qui se charge de déclencher `affilix:auto-pay` au bo
 > Le paiement automatique crédite directement le solde du compte client (méthode **Balance**). Pour les méthodes PayPal ou virement bancaire, les paiements restent manuels depuis **Admin > Affiliation > Retraits**.
 
 ---
+![Affilix](https://files.sx-heberg.fr/api/shares/1CteLw8f/files/12644596-48c0-47d3-a8ba-c1c3cc66d80c?download=false)
 
 ### Paiement par balance
 
