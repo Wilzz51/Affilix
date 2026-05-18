@@ -32,7 +32,13 @@ php artisan migrate
 
 Cela crée les 5 tables nécessaires : `affiliates`, `referrals`, `affiliate_commissions`, `affiliate_clicks`, `affiliation_settings`.
 
-### 3. Vider le cache
+### 3. Compiler les assets
+
+```
+npm run build
+```
+
+### 4. Vider le cache
 
 ```
 php artisan cache:clear
