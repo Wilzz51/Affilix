@@ -36,6 +36,8 @@ Route::get('/export', [AdminAffiliateController::class, 'exportCsv'])->name('exp
 
 // Gestion des affiliés (routes avec paramètres EN DERNIER)
 Route::post('/bulk', [AdminAffiliateController::class, 'bulkAction'])->name('bulk');
+Route::get('/create', [AdminAffiliateController::class, 'create'])->name('create');
+Route::post('/create', [AdminAffiliateController::class, 'storeAdmin'])->name('store');
 Route::get('/', [AdminAffiliateController::class, 'index'])->name('index');
 Route::get('/{affiliate}', [AdminAffiliateController::class, 'show'])->name('show');
 Route::get('/{affiliate}/edit', [AdminAffiliateController::class, 'edit'])->name('edit');

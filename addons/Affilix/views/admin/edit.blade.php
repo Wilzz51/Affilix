@@ -150,30 +150,79 @@
 
                 <div class="divide-y divide-gray-100 dark:divide-gray-700">
 
-                    {{-- Taux de commission --}}
-                    <div class="flex items-start justify-between gap-6 px-5 py-5">
-                        <div class="min-w-0">
-                            <p class="text-sm font-medium text-gray-900 dark:text-white">
-                                {{ __('Taux de commission') }} <span class="text-red-500">*</span>
-                            </p>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                                {{ __('Appliqué sur chaque vente parrainée par cet affilié.') }}
-                            </p>
-                            @if(setting('default_commission_rate'))
-                                <p class="text-xs text-gray-400 dark:text-gray-500 mt-1.5 flex items-center gap-1">
-                                    <i class="bi bi-info-circle text-[11px]"></i>
-                                    {{ __('Taux global par défaut :') }}
-                                    <span class="font-medium text-gray-600 dark:text-gray-300">{{ setting('default_commission_rate') }}%</span>
+                    {{-- Commission type + taux --}}
+                    <div class="px-5 py-5">
+                        <div class="flex items-start justify-between gap-6 mb-4">
+                            <div>
+                                <p class="text-sm font-medium text-gray-900 dark:text-white">
+                                    {{ __('Commission') }} <span class="text-red-500">*</span>
                                 </p>
-                            @endif
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                    {{ __('Pourcentage sur la vente ou montant fixe par commande.') }}
+                                </p>
+                            </div>
                         </div>
-                        <div class="flex items-center gap-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg px-3 h-9 shrink-0">
-                            <input type="number" name="commission_rate"
-                                min="0" max="100" step="0.01"
-                                value="{{ old('commission_rate', $affiliate->commission_rate) }}"
-                                class="bg-transparent text-sm text-gray-900 dark:text-white border-0 outline-none ring-0 focus:outline-none focus:ring-0 w-16 text-right"
-                                required>
-                            <span class="text-sm text-gray-400 dark:text-gray-500 shrink-0">%</span>
+                        @php $commType = old('commission_type', $affiliate->commission_type ?? 'percent'); @endphp
+                        <div class="flex items-center gap-3">
+                            <div class="flex gap-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+                                <button type="button" onclick="setCommissionType('percent')" id="btn-percent"
+                                    class="px-3 py-1.5 rounded-md text-xs font-medium transition-all {{ $commType === 'percent' ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 dark:text-gray-400' }}">
+                                    %
+                                </button>
+                                <button type="button" onclick="setCommissionType('fixed')" id="btn-fixed"
+                                    class="px-3 py-1.5 rounded-md text-xs font-medium transition-all {{ $commType === 'fixed' ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 dark:text-gray-400' }}">
+                                    {{ setting('currency_symbol', '€') }}
+                                </button>
+                            </div>
+                            <input type="hidden" name="commission_type" id="commission_type" value="{{ $commType }}">
+                            <div class="flex items-center gap-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg px-3 h-9 flex-1">
+                                <input type="number" name="commission_rate"
+                                    min="0" max="99999" step="0.01"
+                                    value="{{ old('commission_rate', $affiliate->commission_rate) }}"
+                                    class="bg-transparent text-sm text-gray-900 dark:text-white border-0 outline-none ring-0 focus:outline-none focus:ring-0 w-full text-right"
+                                    required>
+                                <span id="commission_unit" class="text-sm text-gray-400 dark:text-gray-500 shrink-0">{{ $commType === 'fixed' ? setting('currency_symbol', '€') : '%' }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Commission premier achat --}}
+                    @php
+                        $foOverride = $wasSubmitted ? (old('fo_override') === '1') : ($affiliate->first_order_commission_rate !== null);
+                        $foType2    = old('first_order_commission_type', $affiliate->first_order_commission_type ?? 'percent');
+                        $foRate2    = old('first_order_commission_rate', $affiliate->first_order_commission_rate ?? '0');
+                    @endphp
+                    <div class="px-5 py-5">
+                        <div class="flex items-start justify-between gap-6 mb-3">
+                            <div class="min-w-0">
+                                <p class="text-sm font-medium text-gray-900 dark:text-white">{{ __('Commission — Premier achat') }}</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ __('Taux spécifique au premier achat du filleul.') }}</p>
+                            </div>
+                            <label class="relative inline-flex items-center gap-2 cursor-pointer shrink-0">
+                                <input type="checkbox" name="fo_override" value="1" id="fo-override"
+                                    class="sr-only peer" {{ $foOverride ? 'checked' : '' }}>
+                                <div class="w-10 h-[22px] rounded-full transition-colors bg-gray-200 dark:bg-gray-600
+                                    peer-checked:bg-primary
+                                    after:content-[''] after:absolute after:top-[3px] after:start-[3px]
+                                    after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all
+                                    peer-checked:after:translate-x-[18px]"></div>
+                                <span class="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">{{ __('Personnaliser') }}</span>
+                            </label>
+                        </div>
+                        <div id="fo-override-panel" class="{{ $foOverride ? '' : 'hidden' }} flex items-center gap-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl border border-gray-200 dark:border-gray-600 px-4 py-3">
+                            <div class="flex gap-1 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+                                <button type="button" onclick="setFoType2('percent')" id="fo2-btn-percent"
+                                    class="px-3 py-1.5 rounded-md text-xs font-medium transition-all {{ $foType2 === 'percent' ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 dark:text-gray-400' }}">%</button>
+                                <button type="button" onclick="setFoType2('fixed')" id="fo2-btn-fixed"
+                                    class="px-3 py-1.5 rounded-md text-xs font-medium transition-all {{ $foType2 === 'fixed' ? 'bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm' : 'text-gray-500 dark:text-gray-400' }}">{{ setting('currency_symbol', '€') }}</button>
+                            </div>
+                            <input type="hidden" name="first_order_commission_type" id="fo2_type" value="{{ $foType2 }}">
+                            <div class="flex items-center gap-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg px-3 h-9 flex-1">
+                                <input type="number" name="first_order_commission_rate"
+                                    min="0" max="99999" step="0.01" value="{{ $foRate2 }}"
+                                    class="bg-transparent text-sm text-gray-900 dark:text-white border-0 outline-none ring-0 focus:outline-none focus:ring-0 w-full text-right">
+                                <span id="fo2-unit" class="text-sm text-gray-400 dark:text-gray-500 shrink-0">{{ $foType2 === 'fixed' ? setting('currency_symbol', '€') : '%' }}</span>
+                            </div>
                         </div>
                     </div>
 
@@ -343,6 +392,15 @@
 </div>
 
 <script>
+function setCommissionType(type) {
+    document.getElementById('commission_type').value = type;
+    document.getElementById('commission_unit').textContent = type === 'percent' ? '%' : '{{ setting('currency_symbol', '€') }}';
+    var active   = 'px-3 py-1.5 rounded-md text-xs font-medium transition-all bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm';
+    var inactive = 'px-3 py-1.5 rounded-md text-xs font-medium transition-all text-gray-500 dark:text-gray-400';
+    document.getElementById('btn-percent').className = type === 'percent' ? active : inactive;
+    document.getElementById('btn-fixed').className   = type === 'fixed'   ? active : inactive;
+}
+
 document.querySelectorAll('.status-radio').forEach(radio => {
     radio.addEventListener('change', () => {
         document.querySelectorAll('.status-card').forEach(card => {
@@ -353,6 +411,19 @@ document.querySelectorAll('.status-radio').forEach(radio => {
         });
     });
 });
+
+document.getElementById('fo-override').addEventListener('change', function () {
+    document.getElementById('fo-override-panel').classList.toggle('hidden', !this.checked);
+});
+
+function setFoType2(type) {
+    document.getElementById('fo2_type').value = type;
+    document.getElementById('fo2-unit').textContent = type === 'percent' ? '%' : '{{ setting('currency_symbol', '€') }}';
+    var active   = 'px-3 py-1.5 rounded-md text-xs font-medium transition-all bg-white dark:bg-gray-600 text-gray-900 dark:text-white shadow-sm';
+    var inactive = 'px-3 py-1.5 rounded-md text-xs font-medium transition-all text-gray-500 dark:text-gray-400';
+    document.getElementById('fo2-btn-percent').className = type === 'percent' ? active : inactive;
+    document.getElementById('fo2-btn-fixed').className   = type === 'fixed'   ? active : inactive;
+}
 
 document.getElementById('click-override').addEventListener('change', function () {
     document.getElementById('click-override-panel').classList.toggle('hidden', !this.checked);

@@ -111,7 +111,11 @@ class AffiliateController extends Controller
             return redirect()->route('affiliation.dashboard');
         }
 
-        return view('Affilix::register');
+        $registrationEnabled = AffiliationSetting::get('registration_enabled', '1') === '1';
+        $registrationMessage = AffiliationSetting::get('registration_disabled_message', '')
+            ?: __('Pour rejoindre notre programme d\'affiliation, veuillez contacter le support.');
+
+        return view('Affilix::register', compact('registrationEnabled', 'registrationMessage'));
     }
 
     public function store(Request $request)
@@ -136,6 +140,7 @@ class AffiliateController extends Controller
             'customer_id'     => Auth::id(),
             'referral_code'   => Affiliate::generateReferralCode(),
             'commission_rate' => affiliation_setting('default_commission_rate', 10),
+            'commission_type' => AffiliationSetting::get('default_commission_type', 'percent'),
             'payment_method'  => $request->payment_method,
             'payment_details' => $request->payment_details ?? [],
             'status'          => affiliation_setting('auto_approve', true) ? 'active' : 'inactive',

@@ -71,6 +71,12 @@ class CreateAffiliateCommission
             }
         }
 
+        $isFirstOrder = !$referral->fresh()->first_purchase_at
+            || !AffiliateCommission::where('referral_id', $referral->id)
+                ->where('type', 'sale')
+                ->whereNotIn('status', ['cancelled'])
+                ->exists();
+
         if (affiliation_setting('commission_first_order_only', false)) {
             $alreadyCommissioned = AffiliateCommission::where('referral_id', $referral->id)
                 ->whereNotIn('status', ['cancelled'])
@@ -80,7 +86,55 @@ class CreateAffiliateCommission
             }
         }
 
-        $commissionAmount = round(($invoice->total * $affiliate->commission_rate) / 100, 2);
+        $foGlobalEnabled = \App\Addons\Affiliation\Models\AffiliationSetting::get('first_order_commission_enabled', '0') === '1';
+        $foAffiliate     = $affiliate->first_order_commission_rate !== null;
+
+        // Priorité 1a : premier achat avec taux par affilié
+        if ($isFirstOrder && $foAffiliate) {
+            $rate = (float) $affiliate->first_order_commission_rate;
+            $type = $affiliate->first_order_commission_type ?? 'percent';
+        }
+        // Priorité 1b : premier achat avec taux global
+        elseif ($isFirstOrder && $foGlobalEnabled) {
+            $rate = (float) \App\Addons\Affiliation\Models\AffiliationSetting::get('first_order_commission_rate', '0');
+            $type = \App\Addons\Affiliation\Models\AffiliationSetting::get('first_order_commission_type', 'percent');
+        }
+        // Priorité 1c : achats suivants avec taux par affilié
+        elseif (!$isFirstOrder && $foAffiliate && $affiliate->after_first_order_commission_rate !== null) {
+            $rate = (float) $affiliate->after_first_order_commission_rate;
+            $type = $affiliate->after_first_order_commission_type ?? 'percent';
+        }
+        // Priorité 1d : achats suivants avec taux global (peut être 0)
+        elseif (!$isFirstOrder && $foGlobalEnabled) {
+            $rate = (float) \App\Addons\Affiliation\Models\AffiliationSetting::get('after_first_order_commission_rate', '0');
+            $type = \App\Addons\Affiliation\Models\AffiliationSetting::get('after_first_order_commission_type', 'percent');
+        }
+        // Priorité 2 : paliers de commission
+        elseif (\App\Addons\Affiliation\Models\AffiliationSetting::get('commission_tiers_enabled', '0') === '1') {
+            $tiers  = json_decode(\App\Addons\Affiliation\Models\AffiliationSetting::get('commission_tiers', '[]'), true) ?: [];
+            $metric = \App\Addons\Affiliation\Models\AffiliationSetting::get('commission_tiers_metric', 'successful_referrals');
+            $value  = (int) ($affiliate->{$metric} ?? 0);
+
+            usort($tiers, fn($a, $b) => (int)$b['threshold'] <=> (int)$a['threshold']);
+            $matched = null;
+            foreach ($tiers as $tier) {
+                if ($value >= (int) $tier['threshold']) {
+                    $matched = $tier;
+                    break;
+                }
+            }
+            $rate = $matched ? (float) $matched['rate'] : (float) $affiliate->commission_rate;
+            $type = $matched ? ($matched['type'] ?? 'percent') : ($affiliate->commission_type ?? 'percent');
+        }
+        // Priorité 3 : taux habituel de l'affilié
+        else {
+            $rate = (float) $affiliate->commission_rate;
+            $type = $affiliate->commission_type ?? 'percent';
+        }
+
+        $commissionAmount = $type === 'fixed'
+            ? round($rate, 2)
+            : round(($invoice->total * $rate) / 100, 2);
 
         if ($commissionAmount <= 0) {
             return;

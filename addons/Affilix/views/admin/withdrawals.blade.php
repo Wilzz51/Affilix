@@ -29,44 +29,42 @@
 
 {{-- Stats --}}
 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-    <div class="card">
+    <div class="card shadow-sm">
         <div class="card-body flex items-center gap-4">
-            <div class="h-10 w-10 rounded-full bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center shrink-0">
-                <i class="bi bi-hourglass-split text-yellow-600 dark:text-yellow-400"></i>
+            <div class="h-12 w-12 rounded-2xl bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center shrink-0">
+                <i class="bi bi-hourglass-split text-yellow-600 dark:text-yellow-400 text-xl"></i>
             </div>
             <div>
-                <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{{ __('En attente') }}</p>
-                <p class="text-xl font-bold text-yellow-600 dark:text-yellow-400">{{ $stats['pending_count'] }} <span class="text-sm font-normal">demande(s)</span></p>
-                <p class="text-xs text-gray-500 dark:text-gray-400">{{ number_format($stats['pending_amount'], 2) }} {{ setting('currency_symbol', '€') }}</p>
+                <p class="text-2xl font-bold tracking-tight text-yellow-600 dark:text-yellow-400">{{ $stats['pending_count'] }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 font-medium mt-0.5">{{ __('En attente') }}</p>
+                <p class="text-xs text-gray-400 dark:text-gray-500">{{ number_format($stats['pending_amount'], 2) }} {{ setting('currency_symbol', '€') }}</p>
             </div>
         </div>
     </div>
-    <div class="card">
+    <div class="card shadow-sm">
         <div class="card-body flex items-center gap-4">
-            <div class="h-10 w-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center shrink-0">
-                <i class="bi bi-check-circle-fill text-green-600 dark:text-green-400"></i>
+            <div class="h-12 w-12 rounded-2xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center shrink-0">
+                <i class="bi bi-check-circle-fill text-green-600 dark:text-green-400 text-xl"></i>
             </div>
             <div>
-                <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{{ __('Total payé') }}</p>
-                <p class="text-xl font-bold text-green-600 dark:text-green-400">{{ number_format($stats['paid_total'], 2) }} {{ setting('currency_symbol', '€') }}</p>
+                <p class="text-2xl font-bold tracking-tight text-green-600 dark:text-green-400">{{ number_format($stats['paid_total'], 2) }} {{ setting('currency_symbol', '€') }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 font-medium mt-0.5">{{ __('Total payé') }}</p>
             </div>
         </div>
     </div>
-    <div class="card">
+    <div class="card shadow-sm">
         <div class="card-body flex items-center gap-4">
-            <div class="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center shrink-0">
-                <i class="bi bi-wallet2 text-blue-600 dark:text-blue-400"></i>
+            <div class="h-12 w-12 rounded-2xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center shrink-0">
+                <i class="bi bi-link-45deg text-blue-600 dark:text-blue-400 text-xl"></i>
             </div>
-            <div>
-                <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">{{ __('Liens utiles') }}</p>
-                <div class="flex flex-col gap-1 mt-1">
-                    <a href="{{ route('affiliation.admin.commissions') }}" class="text-xs text-primary hover:underline flex items-center gap-1">
-                        <i class="bi bi-cash-stack text-[11px]"></i>{{ __('Commissions') }}
-                    </a>
-                    <a href="{{ route('affiliation.admin.index') }}" class="text-xs text-primary hover:underline flex items-center gap-1">
-                        <i class="bi bi-people text-[11px]"></i>{{ __('Affiliés') }}
-                    </a>
-                </div>
+            <div class="flex flex-col gap-1.5">
+                <p class="text-xs text-gray-500 dark:text-gray-400 font-medium">{{ __('Accès rapides') }}</p>
+                <a href="{{ route('affiliation.admin.commissions') }}" class="text-xs text-primary hover:underline flex items-center gap-1">
+                    <i class="bi bi-cash-stack text-[11px]"></i>{{ __('Commissions') }}
+                </a>
+                <a href="{{ route('affiliation.admin.index') }}" class="text-xs text-primary hover:underline flex items-center gap-1">
+                    <i class="bi bi-people text-[11px]"></i>{{ __('Affiliés') }}
+                </a>
             </div>
         </div>
     </div>
@@ -214,7 +212,7 @@
 
 {{-- Modal Payer --}}
 <div id="pay-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/50">
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md mx-4 p-6">
+    <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-md mx-4 p-6">
         <h3 class="text-base font-semibold text-gray-900 dark:text-white mb-1">{{ __('Confirmer le paiement') }}</h3>
         <p id="pay-modal-text" class="text-sm text-gray-500 dark:text-gray-400 mb-4"></p>
         <form id="pay-form" method="POST">
@@ -234,7 +232,7 @@
 
 {{-- Modal Rejeter --}}
 <div id="reject-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/50">
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md mx-4 p-6">
+    <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-md mx-4 p-6">
         <h3 class="text-base font-semibold text-gray-900 dark:text-white mb-1">{{ __('Rejeter la demande') }}</h3>
         <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">{{ __('Une note optionnelle sera visible par l\'affilié.') }}</p>
         <form id="reject-form" method="POST">

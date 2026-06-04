@@ -14,6 +14,9 @@
         <p class="text-sm text-gray-500 dark:text-gray-400 mt-0.5">{{ __('Suivez les performances et gérez vos affiliés') }}</p>
     </div>
     <div class="flex gap-2">
+        <a href="{{ route('affiliation.admin.create') }}" class="btn btn-primary btn-sm">
+            <i class="bi bi-person-plus mr-1"></i>{{ __('Créer un affilié') }}
+        </a>
         <a href="{{ route('affiliation.admin.dashboard') }}" class="btn btn-secondary btn-sm">
             <i class="bi bi-graph-up-arrow mr-1"></i>{{ __('Dashboard') }}
         </a>
@@ -28,47 +31,47 @@
 
 {{-- Stats --}}
 <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-    <div class="card" style="border-left: 4px solid #6b7280;">
-        <div class="card-body flex items-center gap-3">
-            <div class="h-11 w-11 rounded-xl bg-gray-100 dark:bg-gray-700 flex items-center justify-center shrink-0">
-                <i class="bi bi-people text-gray-600 dark:text-gray-300 text-xl"></i>
+    <div class="card shadow-sm">
+        <div class="card-body flex items-center gap-4">
+            <div class="h-12 w-12 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center shrink-0">
+                <i class="bi bi-people text-gray-500 dark:text-gray-400 text-xl"></i>
             </div>
             <div>
-                <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ number_format($stats['total_affiliates']) }}</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide font-medium mt-0.5">{{ __('Total') }}</p>
+                <p class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{{ number_format($stats['total_affiliates']) }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 font-medium mt-0.5">{{ __('Total') }}</p>
             </div>
         </div>
     </div>
-    <div class="card" style="border-left: 4px solid #22c55e;">
-        <div class="card-body flex items-center gap-3">
-            <div class="h-11 w-11 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center shrink-0">
+    <div class="card shadow-sm">
+        <div class="card-body flex items-center gap-4">
+            <div class="h-12 w-12 rounded-2xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center shrink-0">
                 <i class="bi bi-check-circle text-green-600 dark:text-green-400 text-xl"></i>
             </div>
             <div>
-                <p class="text-2xl font-bold text-green-600 dark:text-green-400">{{ number_format($stats['active_affiliates']) }}</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide font-medium mt-0.5">{{ __('Actifs') }}</p>
+                <p class="text-2xl font-bold tracking-tight text-green-600 dark:text-green-400">{{ number_format($stats['active_affiliates']) }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 font-medium mt-0.5">{{ __('Actifs') }}</p>
             </div>
         </div>
     </div>
-    <div class="card" style="border-left: 4px solid #3b82f6;">
-        <div class="card-body flex items-center gap-3">
-            <div class="h-11 w-11 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center shrink-0">
+    <div class="card shadow-sm">
+        <div class="card-body flex items-center gap-4">
+            <div class="h-12 w-12 rounded-2xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center shrink-0">
                 <i class="bi bi-cash text-blue-600 dark:text-blue-400 text-xl"></i>
             </div>
             <div>
-                <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ number_format($stats['total_commissions'], 2) }} {{ setting('currency_symbol', '€') }}</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide font-medium mt-0.5">{{ __('Commissions') }}</p>
+                <p class="text-2xl font-bold tracking-tight text-blue-600 dark:text-blue-400">{{ number_format($stats['total_commissions'], 2) }} {{ setting('currency_symbol', '€') }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 font-medium mt-0.5">{{ __('Commissions') }}</p>
             </div>
         </div>
     </div>
-    <div class="card" style="border-left: 4px solid #eab308;">
-        <div class="card-body flex items-center gap-3">
-            <div class="h-11 w-11 rounded-xl bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center shrink-0">
+    <div class="card shadow-sm">
+        <div class="card-body flex items-center gap-4">
+            <div class="h-12 w-12 rounded-2xl bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center shrink-0">
                 <i class="bi bi-hourglass-split text-yellow-600 dark:text-yellow-400 text-xl"></i>
             </div>
             <div>
-                <p class="text-2xl font-bold text-yellow-500 dark:text-yellow-400">{{ number_format($stats['pending_commissions'], 2) }} {{ setting('currency_symbol', '€') }}</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide font-medium mt-0.5">{{ __('En attente') }}</p>
+                <p class="text-2xl font-bold tracking-tight text-yellow-500 dark:text-yellow-400">{{ number_format($stats['pending_commissions'], 2) }} {{ setting('currency_symbol', '€') }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 font-medium mt-0.5">{{ __('En attente') }}</p>
             </div>
         </div>
     </div>
@@ -216,7 +219,7 @@
                     <td class="px-5 py-4">
                         <code class="text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-1 rounded-md font-mono tracking-wider whitespace-nowrap">{{ $affiliate->referral_code }}</code>
                     </td>
-                    <td class="px-5 py-4 text-sm font-medium text-center text-gray-700 dark:text-gray-300">{{ number_format($affiliate->commission_rate, 0) }}%</td>
+                    <td class="px-5 py-4 text-sm font-medium text-center text-gray-700 dark:text-gray-300">{{ number_format($affiliate->commission_rate, $affiliate->commission_type === 'fixed' ? 2 : 0) }}{{ $affiliate->commission_type === 'fixed' ? setting('currency_symbol', '€') : '%' }}</td>
                     <td class="px-5 py-4 text-sm text-center text-gray-700 dark:text-gray-300">
                         {{ number_format($affiliate->unique_clicks) }}
                     </td>
@@ -298,7 +301,7 @@
 
 {{-- Modal confirmation suppression --}}
 <div id="delete-modal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 w-full max-w-md">
+    <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-6 w-full max-w-md">
         <div class="flex items-start gap-4 mb-4">
             <div class="h-11 w-11 rounded-xl bg-red-100 dark:bg-red-900/30 flex items-center justify-center shrink-0">
                 <i class="bi bi-trash text-red-600 dark:text-red-400 text-xl"></i>

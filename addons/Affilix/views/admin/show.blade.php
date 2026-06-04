@@ -74,7 +74,7 @@
             </div>
             <div class="flex justify-between items-center py-3 text-sm">
                 <span class="text-gray-500 dark:text-gray-400">{{ __('Affilix::affiliation.stats.commission_rate') }}</span>
-                <span class="font-bold text-gray-900 dark:text-white">{{ number_format($affiliate->commission_rate, 0) }}%</span>
+                <span class="font-bold text-gray-900 dark:text-white">{{ number_format($affiliate->commission_rate, $affiliate->commission_type === 'fixed' ? 2 : 0) }}{{ $affiliate->commission_type === 'fixed' ? setting('currency_symbol', '€') : '%' }}</span>
             </div>
             <div class="flex justify-between items-center py-3 text-sm">
                 <span class="text-gray-500 dark:text-gray-400">{{ __('Affilix::affiliation.payment_method') }}</span>
@@ -116,7 +116,7 @@
     <div class="grid grid-cols-2 lg:grid-cols-1 gap-3 content-start">
         <div class="card" style="border-left: 4px solid #6b7280;">
             <div class="card-body flex items-center gap-3">
-                <div class="h-10 w-10 rounded-xl bg-gray-100 dark:bg-gray-700 flex items-center justify-center shrink-0">
+                <div class="h-10 w-10 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center shrink-0">
                     <i class="bi bi-cursor text-gray-600 dark:text-gray-300 text-lg"></i>
                 </div>
                 <div>
@@ -173,7 +173,7 @@
 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
     <div class="card" style="border-left: 4px solid #6b7280;">
         <div class="card-body flex items-center gap-3">
-            <div class="h-11 w-11 rounded-xl bg-gray-100 dark:bg-gray-700 flex items-center justify-center shrink-0">
+            <div class="h-11 w-11 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center shrink-0">
                 <i class="bi bi-graph-up text-gray-600 dark:text-gray-300 text-xl"></i>
             </div>
             <div>

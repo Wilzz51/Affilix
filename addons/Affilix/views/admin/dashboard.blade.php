@@ -28,48 +28,48 @@
 
 {{-- Stats --}}
 <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-    <div class="card" style="border-left: 4px solid #6b7280;">
-        <div class="card-body flex items-center gap-3">
-            <div class="h-11 w-11 rounded-xl bg-gray-100 dark:bg-gray-700 flex items-center justify-center shrink-0">
-                <i class="bi bi-people text-gray-600 dark:text-gray-300 text-xl"></i>
+    <div class="card shadow-sm">
+        <div class="card-body flex items-center gap-4">
+            <div class="h-12 w-12 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center shrink-0">
+                <i class="bi bi-people text-gray-500 dark:text-gray-400 text-xl"></i>
             </div>
             <div>
-                <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $totalAffiliates }}</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide font-medium mt-0.5">{{ __('Affiliés') }}</p>
+                <p class="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{{ $totalAffiliates }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 font-medium mt-0.5">{{ __('Affiliés') }}</p>
                 <p class="text-xs text-green-500 mt-0.5">{{ $activeAffiliates }} {{ __('actifs') }}</p>
             </div>
         </div>
     </div>
-    <div class="card" style="border-left: 4px solid #3b82f6;">
-        <div class="card-body flex items-center gap-3">
-            <div class="h-11 w-11 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center shrink-0">
+    <div class="card shadow-sm">
+        <div class="card-body flex items-center gap-4">
+            <div class="h-12 w-12 rounded-2xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center shrink-0">
                 <i class="bi bi-cursor text-blue-600 dark:text-blue-400 text-xl"></i>
             </div>
             <div>
-                <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ number_format($totalClicks) }}</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide font-medium mt-0.5">{{ __('Clics uniques') }}</p>
+                <p class="text-2xl font-bold tracking-tight text-blue-600 dark:text-blue-400">{{ number_format($totalClicks) }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 font-medium mt-0.5">{{ __('Clics uniques') }}</p>
             </div>
         </div>
     </div>
-    <div class="card" style="border-left: 4px solid #22c55e;">
-        <div class="card-body flex items-center gap-3">
-            <div class="h-11 w-11 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center shrink-0">
+    <div class="card shadow-sm">
+        <div class="card-body flex items-center gap-4">
+            <div class="h-12 w-12 rounded-2xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center shrink-0">
                 <i class="bi bi-arrow-repeat text-green-600 dark:text-green-400 text-xl"></i>
             </div>
             <div>
-                <p class="text-2xl font-bold text-green-600 dark:text-green-400">{{ $conversionRate }}%</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide font-medium mt-0.5">{{ __('Taux de conversion') }}</p>
+                <p class="text-2xl font-bold tracking-tight text-green-600 dark:text-green-400">{{ $conversionRate }}%</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 font-medium mt-0.5">{{ __('Taux de conversion') }}</p>
             </div>
         </div>
     </div>
-    <div class="card" style="border-left: 4px solid #a855f7;">
-        <div class="card-body flex items-center gap-3">
-            <div class="h-11 w-11 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center shrink-0">
+    <div class="card shadow-sm">
+        <div class="card-body flex items-center gap-4">
+            <div class="h-12 w-12 rounded-2xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center shrink-0">
                 <i class="bi bi-cash text-purple-600 dark:text-purple-400 text-xl"></i>
             </div>
             <div>
-                <p class="text-2xl font-bold text-purple-600 dark:text-purple-400">{{ number_format($totalPaid, 2) }} {{ $currency }}</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide font-medium mt-0.5">{{ __('Total versé') }}</p>
+                <p class="text-2xl font-bold tracking-tight text-purple-600 dark:text-purple-400">{{ number_format($totalPaid, 2) }} {{ $currency }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 font-medium mt-0.5">{{ __('Total versé') }}</p>
                 <p class="text-xs text-yellow-500 mt-0.5">{{ number_format($totalPending, 2) }} {{ $currency }} {{ __('att.') }}</p>
             </div>
         </div>

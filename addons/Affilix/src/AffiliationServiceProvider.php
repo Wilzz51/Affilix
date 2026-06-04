@@ -87,7 +87,7 @@ class AffiliationServiceProvider extends BaseAddonServiceProvider
             'Affilix::affiliation.settings',
             'Affilix::affiliation.admin.settings_description',
             'bi bi-sliders',
-            [AdminAffiliateController::class, 'settings'],
+            url(admin_prefix() . '/affiliation/settings'),
             'admin.manage_settings'
         );
 
@@ -97,7 +97,7 @@ class AffiliationServiceProvider extends BaseAddonServiceProvider
             'Affilix::affiliation.admin.affiliates',
             'Affilix::affiliation.admin.affiliates_description',
             'bi bi-people-fill',
-            [AdminAffiliateController::class, 'index'],
+            url(admin_prefix() . '/affiliation'),
             'admin.show_customers'
         );
 
@@ -107,7 +107,7 @@ class AffiliationServiceProvider extends BaseAddonServiceProvider
             'Affilix::affiliation.commissions',
             'Affilix::affiliation.admin.commissions_description',
             'bi bi-cash-stack',
-            [AdminAffiliateController::class, 'commissions'],
+            url(admin_prefix() . '/affiliation/commissions'),
             'admin.show_customers'
         );
     }

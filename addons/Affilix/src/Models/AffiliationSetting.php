@@ -51,10 +51,15 @@ class AffiliationSetting extends Model
         Cache::forget('affiliation_all_settings');
         
         $keys = [
-            'default_commission_rate', 'auto_approve', 'auto_approve_commissions',
+            'default_commission_rate', 'default_commission_type',
+            'auto_approve', 'auto_approve_commissions',
             'minimum_payout', 'cookie_lifetime',
             'click_remuneration_enabled', 'click_remuneration_rate',
             'auto_payment_enabled', 'auto_payment_frequency', 'auto_payment_threshold',
+            'registration_enabled', 'registration_disabled_message',
+            'first_order_commission_enabled', 'first_order_commission_rate', 'first_order_commission_type',
+            'after_first_order_commission_rate', 'after_first_order_commission_type',
+            'commission_tiers_enabled', 'commission_tiers_metric', 'commission_tiers',
         ];
         foreach ($keys as $key) {
             Cache::forget("affiliation_setting_{$key}");

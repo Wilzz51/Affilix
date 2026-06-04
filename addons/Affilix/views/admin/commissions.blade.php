@@ -43,36 +43,36 @@
 
 {{-- Stats --}}
 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-    <div class="card" style="border-left: 4px solid #eab308;">
+    <div class="card shadow-sm">
         <div class="card-body flex items-center gap-4">
-            <div class="h-11 w-11 rounded-xl bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center shrink-0">
+            <div class="h-12 w-12 rounded-2xl bg-yellow-100 dark:bg-yellow-900/30 flex items-center justify-center shrink-0">
                 <i class="bi bi-hourglass-split text-yellow-600 dark:text-yellow-400 text-xl"></i>
             </div>
             <div class="min-w-0">
-                <p class="text-2xl font-bold text-yellow-500 dark:text-yellow-400 truncate">{{ number_format($stats['pending'], 2) }} {{ setting('currency_symbol', '€') }}</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide font-medium mt-0.5">{{ __('Affilix::affiliation.pending') }}</p>
+                <p class="text-2xl font-bold tracking-tight text-yellow-500 dark:text-yellow-400 truncate">{{ number_format($stats['pending'], 2) }} {{ setting('currency_symbol', '€') }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 font-medium mt-0.5">{{ __('Affilix::affiliation.pending') }}</p>
             </div>
         </div>
     </div>
-    <div class="card" style="border-left: 4px solid #3b82f6;">
+    <div class="card shadow-sm">
         <div class="card-body flex items-center gap-4">
-            <div class="h-11 w-11 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center shrink-0">
+            <div class="h-12 w-12 rounded-2xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center shrink-0">
                 <i class="bi bi-check2-circle text-blue-600 dark:text-blue-400 text-xl"></i>
             </div>
             <div class="min-w-0">
-                <p class="text-2xl font-bold text-blue-600 dark:text-blue-400 truncate">{{ number_format($stats['approved'], 2) }} {{ setting('currency_symbol', '€') }}</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide font-medium mt-0.5">{{ __('Affilix::affiliation.approved') }}</p>
+                <p class="text-2xl font-bold tracking-tight text-blue-600 dark:text-blue-400 truncate">{{ number_format($stats['approved'], 2) }} {{ setting('currency_symbol', '€') }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 font-medium mt-0.5">{{ __('Affilix::affiliation.approved') }}</p>
             </div>
         </div>
     </div>
-    <div class="card" style="border-left: 4px solid #22c55e;">
+    <div class="card shadow-sm">
         <div class="card-body flex items-center gap-4">
-            <div class="h-11 w-11 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center shrink-0">
+            <div class="h-12 w-12 rounded-2xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center shrink-0">
                 <i class="bi bi-check-circle text-green-600 dark:text-green-400 text-xl"></i>
             </div>
             <div class="min-w-0">
-                <p class="text-2xl font-bold text-green-600 dark:text-green-400 truncate">{{ number_format($stats['paid'], 2) }} {{ setting('currency_symbol', '€') }}</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide font-medium mt-0.5">{{ __('Affilix::affiliation.paid') }}</p>
+                <p class="text-2xl font-bold tracking-tight text-green-600 dark:text-green-400 truncate">{{ number_format($stats['paid'], 2) }} {{ setting('currency_symbol', '€') }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 font-medium mt-0.5">{{ __('Affilix::affiliation.paid') }}</p>
             </div>
         </div>
     </div>
@@ -302,7 +302,7 @@
 
 {{-- Payment modal --}}
 <div id="pay-modal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 w-full max-w-md">
+    <div class="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl p-6 w-full max-w-md">
         <div class="flex items-start gap-4 mb-5">
             <div class="h-11 w-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                 <i class="bi bi-cash text-primary text-xl"></i>

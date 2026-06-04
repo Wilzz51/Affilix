@@ -271,6 +271,48 @@ class AdminAffiliateController extends Controller
     }
 
     /**
+     * Formulaire de création manuelle
+     */
+    public function create()
+    {
+        $existingIds = Affiliate::pluck('customer_id');
+        $customers   = \App\Models\Account\Customer::whereNotIn('id', $existingIds)
+            ->orderBy('firstname')
+            ->get();
+
+        return view('Affilix_admin::create', compact('customers'));
+    }
+
+    /**
+     * Enregistrer un affilié créé manuellement
+     */
+    public function storeAdmin(Request $request)
+    {
+        $customerTable = (new \App\Models\Account\Customer)->getTable();
+        $request->validate([
+            'customer_id'     => "required|exists:{$customerTable},id|unique:affiliates,customer_id",
+            'commission_type' => 'required|in:percent,fixed',
+            'commission_rate' => 'required|numeric|min:0|max:99999',
+            'status'          => 'required|in:active,inactive,suspended',
+            'payment_method'  => 'nullable|in:balance,paypal,bank_transfer',
+        ]);
+
+        Affiliate::create([
+            'customer_id'     => $request->customer_id,
+            'referral_code'   => Affiliate::generateReferralCode(),
+            'commission_type' => $request->commission_type,
+            'commission_rate' => $request->commission_rate,
+            'status'          => $request->status,
+            'payment_method'  => $request->payment_method ?? 'balance',
+            'payment_details' => [],
+            'approved_at'     => $request->status === 'active' ? now() : null,
+        ]);
+
+        return redirect()->route('affiliation.admin.index')
+            ->with('success', __('Affilié créé avec succès.'));
+    }
+
+    /**
      * Éditer un affilié
      */
     public function edit(Affiliate $affiliate)
@@ -285,13 +327,24 @@ class AdminAffiliateController extends Controller
     public function update(Request $request, Affiliate $affiliate)
     {
         $request->validate([
-            'commission_rate'         => 'required|numeric|min:0|max:100',
-            'status'                  => 'required|in:active,inactive,suspended',
-            'click_remuneration_rate' => 'nullable|numeric|min:0|max:999999',
-            'notes'                   => 'nullable|string|max:2000',
+            'commission_rate'             => 'required|numeric|min:0|max:99999',
+            'commission_type'             => 'required|in:percent,fixed',
+            'status'                      => 'required|in:active,inactive,suspended',
+            'click_remuneration_rate'     => 'nullable|numeric|min:0|max:999999',
+            'first_order_commission_rate' => 'nullable|numeric|min:0|max:99999',
+            'first_order_commission_type' => 'nullable|in:percent,fixed',
+            'notes'                       => 'nullable|string|max:2000',
         ]);
 
-        $data = $request->only(['commission_rate', 'status', 'notes']);
+        $data = $request->only(['commission_rate', 'commission_type', 'status', 'notes']);
+
+        if ($request->has('fo_override')) {
+            $data['first_order_commission_rate'] = (float) $request->input('first_order_commission_rate', 0);
+            $data['first_order_commission_type'] = $request->input('first_order_commission_type', 'percent');
+        } else {
+            $data['first_order_commission_rate'] = null;
+            $data['first_order_commission_type'] = null;
+        }
 
         if ($request->status === 'active' && $affiliate->status !== 'active') {
             $data['approved_at'] = now();
@@ -576,8 +629,32 @@ class AdminAffiliateController extends Controller
 
         // Stockés dans affiliation_settings pour garantir la persistance indépendamment
         // du SettingsService ClientXCMS (qui peut ignorer les clés inconnues)
+        AffiliationSetting::set('registration_enabled', $request->has('registration_enabled') ? '1' : '0');
+        AffiliationSetting::set('registration_disabled_message', $request->input('registration_disabled_message', ''));
+        AffiliationSetting::set('first_order_commission_enabled', $request->has('first_order_commission_enabled') ? '1' : '0');
+        AffiliationSetting::set('first_order_commission_type', in_array($request->input('first_order_commission_type'), ['percent', 'fixed']) ? $request->input('first_order_commission_type') : 'percent');
+        AffiliationSetting::set('first_order_commission_rate', (string) max(0, (float) $request->input('first_order_commission_rate', 0)));
+        AffiliationSetting::set('after_first_order_commission_type', in_array($request->input('after_first_order_commission_type'), ['percent', 'fixed']) ? $request->input('after_first_order_commission_type') : 'percent');
+        AffiliationSetting::set('after_first_order_commission_rate', (string) max(0, (float) $request->input('after_first_order_commission_rate', 0)));
+
+        AffiliationSetting::set('commission_tiers_enabled', $request->has('commission_tiers_enabled') ? '1' : '0');
+        AffiliationSetting::set('commission_tiers_metric', in_array($request->input('commission_tiers_metric'), ['successful_referrals', 'total_referrals', 'unique_clicks']) ? $request->input('commission_tiers_metric') : 'successful_referrals');
+        $tiersRaw = $request->input('tiers_threshold', []);
+        $tiersRate = $request->input('tiers_rate', []);
+        $tiersType = $request->input('tiers_type', []);
+        $tiers = [];
+        foreach ($tiersRaw as $i => $threshold) {
+            $rate = (float) ($tiersRate[$i] ?? 0);
+            $type = in_array($tiersType[$i] ?? '', ['percent', 'fixed']) ? $tiersType[$i] : 'percent';
+            if (is_numeric($threshold) && $rate > 0) {
+                $tiers[] = ['threshold' => (int) $threshold, 'rate' => $rate, 'type' => $type];
+            }
+        }
+        usort($tiers, fn($a, $b) => $a['threshold'] <=> $b['threshold']);
+        AffiliationSetting::set('commission_tiers', json_encode($tiers));
         AffiliationSetting::set('click_remuneration_enabled', $request->has('click_remuneration_enabled') ? '1' : '0');
         AffiliationSetting::set('click_remuneration_rate', (string) (float) $request->input('click_remuneration_rate', 0));
+        AffiliationSetting::set('default_commission_type', in_array($request->input('default_commission_type'), ['percent', 'fixed']) ? $request->input('default_commission_type') : 'percent');
         AffiliationSetting::set('auto_payment_enabled', $request->has('auto_payment_enabled') ? '1' : '0');
         AffiliationSetting::set('auto_payment_frequency', $request->input('auto_payment_frequency', 'monthly'));
         AffiliationSetting::set('auto_payment_threshold', (string) max(0.01, (float) $request->input('auto_payment_threshold', 1)));

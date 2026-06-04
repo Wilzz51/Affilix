@@ -35,6 +35,21 @@
     </div>
     <div class="card-body">
 
+    @if(!$registrationEnabled)
+        <div class="flex flex-col items-center justify-center gap-4 py-10 text-center">
+            <div class="h-16 w-16 rounded-2xl bg-orange-100 dark:bg-orange-900/20 flex items-center justify-center">
+                <i class="bi bi-lock text-orange-500 dark:text-orange-400 text-3xl"></i>
+            </div>
+            <div>
+                <p class="text-base font-semibold text-gray-800 dark:text-gray-200">{{ __('Inscriptions fermées') }}</p>
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 max-w-sm">{{ $registrationMessage }}</p>
+            </div>
+            <a href="/client" class="btn btn-secondary btn-sm mt-2">
+                ← {{ __('Retour') }}
+            </a>
+        </div>
+    @else
+
         {{-- Avantages --}}
         <div class="rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 p-4 mb-6">
             <p class="font-semibold text-blue-700 dark:text-blue-300 mb-2">{{ __('Avantages du programme') }}</p>
@@ -136,8 +151,10 @@
     </div>
 </div>
 
+    @endif
+
 <script>
-document.getElementById('payment_method').addEventListener('change', function () {
+document.getElementById('payment_method') && document.getElementById('payment_method').addEventListener('change', function () {
     ['balance-details', 'paypal-details', 'bank-details'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.classList.add('hidden');
