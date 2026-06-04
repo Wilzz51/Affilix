@@ -297,16 +297,21 @@ class AdminAffiliateController extends Controller
             'payment_method'  => 'nullable|in:balance,paypal,bank_transfer',
         ]);
 
-        Affiliate::create([
+        $data = [
             'customer_id'     => $request->customer_id,
             'referral_code'   => Affiliate::generateReferralCode(),
-            'commission_type' => $request->commission_type,
             'commission_rate' => $request->commission_rate,
             'status'          => $request->status,
             'payment_method'  => $request->payment_method ?? 'balance',
             'payment_details' => [],
             'approved_at'     => $request->status === 'active' ? now() : null,
-        ]);
+        ];
+
+        if (\Illuminate\Support\Facades\Schema::hasColumn('affiliates', 'commission_type')) {
+            $data['commission_type'] = $request->commission_type;
+        }
+
+        Affiliate::create($data);
 
         return redirect()->route('affiliation.admin.index')
             ->with('success', __('Affilié créé avec succès.'));
@@ -336,26 +341,41 @@ class AdminAffiliateController extends Controller
             'notes'                       => 'nullable|string|max:2000',
         ]);
 
-        $data = $request->only(['commission_rate', 'commission_type', 'status', 'notes']);
+        $schema = \Illuminate\Support\Facades\Schema::class;
 
-        if ($request->has('fo_override')) {
-            $data['first_order_commission_rate'] = (float) $request->input('first_order_commission_rate', 0);
-            $data['first_order_commission_type'] = $request->input('first_order_commission_type', 'percent');
-        } else {
-            $data['first_order_commission_rate'] = null;
-            $data['first_order_commission_type'] = null;
+        $data = $request->only(['commission_rate', 'status', 'notes']);
+
+        if ($schema::hasColumn('affiliates', 'commission_type')) {
+            $data['commission_type'] = $request->input('commission_type', 'percent');
         }
 
         if ($request->status === 'active' && $affiliate->status !== 'active') {
             $data['approved_at'] = now();
         }
 
-        if ($request->has('click_override')) {
-            $data['click_remuneration_enabled'] = $request->boolean('click_remuneration_enabled');
-            $data['click_remuneration_rate']    = (float) $request->input('click_remuneration_rate', 0);
-        } else {
-            $data['click_remuneration_enabled'] = null;
-            $data['click_remuneration_rate']    = null;
+        if ($schema::hasColumn('affiliates', 'click_remuneration_enabled')) {
+            if ($request->has('click_override')) {
+                $data['click_remuneration_enabled'] = $request->boolean('click_remuneration_enabled');
+                $data['click_remuneration_rate']    = (float) $request->input('click_remuneration_rate', 0);
+            } else {
+                $data['click_remuneration_enabled'] = null;
+                $data['click_remuneration_rate']    = null;
+            }
+        }
+
+        if ($schema::hasColumn('affiliates', 'first_order_commission_rate')) {
+            if ($request->has('fo_override')) {
+                $data['first_order_commission_rate'] = (float) $request->input('first_order_commission_rate', 0);
+                $data['first_order_commission_type'] = $request->input('first_order_commission_type', 'percent');
+            } else {
+                $data['first_order_commission_rate'] = null;
+                $data['first_order_commission_type'] = null;
+            }
+        }
+
+        if ($schema::hasColumn('affiliates', 'after_first_order_commission_rate')) {
+            $data['after_first_order_commission_rate'] = null;
+            $data['after_first_order_commission_type'] = null;
         }
 
         $affiliate->update($data);

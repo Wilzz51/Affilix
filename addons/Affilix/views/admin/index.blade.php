@@ -219,7 +219,7 @@
                     <td class="px-5 py-4">
                         <code class="text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 px-2 py-1 rounded-md font-mono tracking-wider whitespace-nowrap">{{ $affiliate->referral_code }}</code>
                     </td>
-                    <td class="px-5 py-4 text-sm font-medium text-center text-gray-700 dark:text-gray-300">{{ number_format($affiliate->commission_rate, $affiliate->commission_type === 'fixed' ? 2 : 0) }}{{ $affiliate->commission_type === 'fixed' ? setting('currency_symbol', '€') : '%' }}</td>
+                    <td class="px-5 py-4 text-sm font-medium text-center text-gray-700 dark:text-gray-300">{{ number_format($affiliate->commission_rate, ($affiliate->commission_type ?? 'percent') === 'fixed' ? 2 : 0) }}{{ ($affiliate->commission_type ?? 'percent') === 'fixed' ? ' ' . setting('currency_symbol', '€') : '%' }}</td>
                     <td class="px-5 py-4 text-sm text-center text-gray-700 dark:text-gray-300">
                         {{ number_format($affiliate->unique_clicks) }}
                     </td>

@@ -36,17 +36,22 @@
     <div class="card-body">
 
     @if(!$registrationEnabled)
-        <div class="flex flex-col items-center justify-center gap-4 py-10 text-center">
-            <div class="h-16 w-16 rounded-2xl bg-orange-100 dark:bg-orange-900/20 flex items-center justify-center">
-                <i class="bi bi-lock text-orange-500 dark:text-orange-400 text-3xl"></i>
+        <div class="rounded-2xl overflow-hidden">
+            {{-- Bande colorée --}}
+            <div class="bg-gradient-to-r from-primary to-primary/70 px-6 py-8 text-center relative">
+                <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(circle at 20% 50%, white 1px, transparent 1px), radial-gradient(circle at 80% 20%, white 1px, transparent 1px); background-size: 32px 32px;"></div>
+                <div class="relative inline-flex h-16 w-16 rounded-2xl bg-white/20 border border-white/30 items-center justify-center mb-3">
+                    <i class="bi bi-lock-fill text-white text-3xl"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white relative">{{ __('Inscriptions fermées') }}</h3>
             </div>
-            <div>
-                <p class="text-base font-semibold text-gray-800 dark:text-gray-200">{{ __('Inscriptions fermées') }}</p>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 max-w-sm">{{ $registrationMessage }}</p>
+            {{-- Message --}}
+            <div class="bg-gray-50 dark:bg-gray-800/50 px-6 py-6 text-center border-t border-gray-100 dark:border-gray-700">
+                <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed whitespace-pre-line max-w-md mx-auto">{{ $registrationMessage }}</p>
+                <a href="/client" class="inline-flex items-center gap-2 mt-5 px-5 py-2.5 rounded-xl bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors shadow-sm">
+                    <i class="bi bi-arrow-left text-xs"></i>{{ __('Retour') }}
+                </a>
             </div>
-            <a href="/client" class="btn btn-secondary btn-sm mt-2">
-                ← {{ __('Retour') }}
-            </a>
         </div>
     @else
 

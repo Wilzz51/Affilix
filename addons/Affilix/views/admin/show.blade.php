@@ -74,7 +74,7 @@
             </div>
             <div class="flex justify-between items-center py-3 text-sm">
                 <span class="text-gray-500 dark:text-gray-400">{{ __('Affilix::affiliation.stats.commission_rate') }}</span>
-                <span class="font-bold text-gray-900 dark:text-white">{{ number_format($affiliate->commission_rate, $affiliate->commission_type === 'fixed' ? 2 : 0) }}{{ $affiliate->commission_type === 'fixed' ? setting('currency_symbol', '€') : '%' }}</span>
+                <span class="font-bold text-gray-900 dark:text-white">{{ number_format($affiliate->commission_rate, ($affiliate->commission_type ?? 'percent') === 'fixed' ? 2 : 0) }}{{ ($affiliate->commission_type ?? 'percent') === 'fixed' ? ' ' . setting('currency_symbol', '€') : '%' }}</span>
             </div>
             <div class="flex justify-between items-center py-3 text-sm">
                 <span class="text-gray-500 dark:text-gray-400">{{ __('Affilix::affiliation.payment_method') }}</span>

@@ -147,6 +147,7 @@
             <form action="{{ route('affiliation.admin.update', $affiliate) }}" method="POST">
                 @csrf
                 @method('PUT')
+                @php $wasSubmitted = request()->old() ? true : false; @endphp
 
                 <div class="divide-y divide-gray-100 dark:divide-gray-700">
 
@@ -228,8 +229,6 @@
 
                     {{-- Rémunération au clic --}}
                     @php
-                        use App\Addons\Affiliation\Models\AffiliationSetting;
-                        $wasSubmitted   = request()->old() ? true : false;
                         $hasOverride    = $wasSubmitted
                             ? (old('click_override') === '1')
                             : ($affiliate->click_remuneration_enabled !== null);
@@ -237,9 +236,9 @@
                             ? (old('click_remuneration_enabled') === '1')
                             : ($affiliate->click_remuneration_enabled === true);
                         $clickRate      = old('click_remuneration_rate',
-                            $affiliate->click_remuneration_rate ?? AffiliationSetting::get('click_remuneration_rate', '0.00'));
-                        $globalEnabled  = AffiliationSetting::get('click_remuneration_enabled', '0') === '1';
-                        $globalRate     = AffiliationSetting::get('click_remuneration_rate', '0.00');
+                            $affiliate->click_remuneration_rate ?? \App\Addons\Affiliation\Models\AffiliationSetting::get('click_remuneration_rate', '0.00'));
+                        $globalEnabled  = \App\Addons\Affiliation\Models\AffiliationSetting::get('click_remuneration_enabled', '0') === '1';
+                        $globalRate     = \App\Addons\Affiliation\Models\AffiliationSetting::get('click_remuneration_rate', '0.00');
                     @endphp
                     <div class="px-5 py-5">
                         <div class="flex items-start justify-between gap-6 mb-3">

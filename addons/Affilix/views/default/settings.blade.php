@@ -3,51 +3,93 @@
 @section('title', __('Affilix::affiliation.settings'))
 
 @section('content')
-<div class="max-w-4xl mx-auto py-6">
+<div class="max-w-4xl mx-auto py-6 space-y-5">
 
 {{-- Flash --}}
 @if(session('success'))
-    <div class="rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 p-4 mb-4 text-sm text-green-700 dark:text-green-300">
-        {{ session('success') }}
+    <div class="rounded-2xl bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 p-4 text-sm text-green-700 dark:text-green-300 flex items-center gap-2.5">
+        <i class="bi bi-check-circle-fill shrink-0"></i>{{ session('success') }}
     </div>
 @endif
 @if($errors->any())
-    <div class="rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 p-4 mb-4 text-sm text-red-700 dark:text-red-300">
-        <ul class="list-disc list-inside space-y-1">
-            @foreach($errors->all() as $error)
-                <li>{{ $error }}</li>
-            @endforeach
+    <div class="rounded-2xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 p-4 text-sm text-red-700 dark:text-red-300 flex gap-2.5">
+        <i class="bi bi-exclamation-circle-fill mt-0.5 shrink-0"></i>
+        <ul class="list-disc list-inside space-y-0.5">
+            @foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach
         </ul>
     </div>
 @endif
 
-{{-- Navigation --}}
-<div class="card mb-4">
+{{-- Header --}}
+<div class="flex items-center justify-between">
+    <div class="flex items-center gap-3">
+        <a href="{{ route('affiliation.dashboard') }}"
+            class="h-9 w-9 rounded-xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors shrink-0">
+            <i class="bi bi-arrow-left text-gray-600 dark:text-gray-400 text-sm"></i>
+        </a>
+        <h1 class="text-xl font-bold text-gray-900 dark:text-white">{{ __('Paramètres') }}</h1>
+    </div>
+    <div class="flex gap-2">
+        <a href="{{ route('affiliation.commissions') }}" class="btn btn-secondary btn-sm">
+            <i class="bi bi-cash-stack mr-1"></i>{{ __('Commissions') }}
+        </a>
+        <a href="{{ route('affiliation.referrals') }}" class="btn btn-secondary btn-sm">
+            <i class="bi bi-people mr-1"></i>{{ __('Parrainages') }}
+        </a>
+    </div>
+</div>
+
+{{-- Infos compte --}}
+<div class="card shadow-sm">
     <div class="card-heading">
-        <div>
-            <h4>{{ __('Affilix::affiliation.settings') }}</h4>
-            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Code :') }} <strong class="font-mono">{{ $affiliate->referral_code }}</strong></p>
+        <div class="flex items-center gap-2">
+            <div class="h-7 w-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                <i class="bi bi-person text-primary text-xs"></i>
+            </div>
+            <h4 class="text-sm">{{ __('Mon compte affilié') }}</h4>
         </div>
-        <div class="flex gap-2">
-            <a href="{{ route('affiliation.dashboard') }}" class="btn btn-secondary btn-sm">
-                <i class="bi bi-speedometer2 mr-1"></i>{{ __('Dashboard') }}
-            </a>
-            <a href="{{ route('affiliation.commissions') }}" class="btn btn-secondary btn-sm">
-                <i class="bi bi-cash-stack mr-1"></i>{{ __('Commissions') }}
-            </a>
-            <a href="{{ route('affiliation.referrals') }}" class="btn btn-secondary btn-sm">
-                <i class="bi bi-people mr-1"></i>{{ __('Parrainages') }}
-            </a>
+    </div>
+    <div class="divide-y divide-gray-100 dark:divide-gray-700 text-sm">
+        <div class="flex justify-between items-center px-5 py-3">
+            <span class="text-gray-500 dark:text-gray-400">{{ __('Code de parrainage') }}</span>
+            <code class="font-mono text-xs bg-gray-100 dark:bg-gray-700 px-2.5 py-1 rounded-lg text-gray-700 dark:text-gray-300">{{ $affiliate->referral_code }}</code>
+        </div>
+        <div class="flex justify-between items-center px-5 py-3">
+            <span class="text-gray-500 dark:text-gray-400">{{ __('Commission') }}</span>
+            <span class="font-semibold text-gray-900 dark:text-white">
+                {{ number_format($affiliate->commission_rate, ($affiliate->commission_type ?? 'percent') === 'fixed' ? 2 : 0) }}{{ ($affiliate->commission_type ?? 'percent') === 'fixed' ? ' ' . setting('currency_symbol', '€') : '%' }}
+            </span>
+        </div>
+        <div class="flex justify-between items-center px-5 py-3">
+            <span class="text-gray-500 dark:text-gray-400">{{ __('Statut') }}</span>
+            @if($affiliate->status === 'active')
+                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                    <i class="bi bi-circle-fill text-[6px]"></i>{{ __('Actif') }}
+                </span>
+            @elseif($affiliate->status === 'inactive')
+                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400">
+                    <i class="bi bi-circle-fill text-[6px]"></i>{{ __('En attente') }}
+                </span>
+            @else
+                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">
+                    <i class="bi bi-circle-fill text-[6px]"></i>{{ __('Suspendu') }}
+                </span>
+            @endif
         </div>
     </div>
 </div>
 
-{{-- Formulaire --}}
-<div class="card">
+{{-- Méthode de paiement --}}
+<div class="card shadow-sm">
     <div class="card-heading">
-        <h4>{{ __('Affilix::affiliation.payment_method') }}</h4>
+        <div class="flex items-center gap-2">
+            <div class="h-7 w-7 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center shrink-0">
+                <i class="bi bi-wallet2 text-green-600 dark:text-green-400 text-xs"></i>
+            </div>
+            <h4 class="text-sm">{{ __('Méthode de paiement') }}</h4>
+        </div>
     </div>
-    <div class="card-body">
+    <div class="p-5">
         <form action="{{ route('affiliation.settings.update') }}" method="POST" class="space-y-4">
             @csrf
             @method('PUT')
@@ -60,11 +102,11 @@
             @endphp
 
             <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    {{ __('Affilix::affiliation.payment_method') }} <span class="text-red-500">*</span>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                    {{ __('Méthode') }} <span class="text-red-500">*</span>
                 </label>
                 <select name="payment_method" id="payment_method" required
-                    class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary">
+                    class="w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition">
                     @foreach($methods as $value => $label)
                         <option value="{{ $value }}" {{ old('payment_method', $affiliate->payment_method) === $value ? 'selected' : '' }}>
                             {{ $label }}
@@ -75,74 +117,47 @@
 
             {{-- Balance info --}}
             <div id="balance-details" class="{{ old('payment_method', $affiliate->payment_method) === 'balance' ? '' : 'hidden' }}">
-                <div class="rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 p-3 text-sm text-blue-700 dark:text-blue-300">
-                    <i class="bi bi-info-circle mr-1"></i>
+                <div class="rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 p-3.5 text-sm text-blue-700 dark:text-blue-300 flex items-center gap-2">
+                    <i class="bi bi-info-circle shrink-0"></i>
                     {{ __('Vos commissions seront ajoutées directement à votre solde de compte.') }}
                 </div>
             </div>
 
             {{-- PayPal --}}
             <div id="paypal-details" class="{{ old('payment_method', $affiliate->payment_method) === 'paypal' ? '' : 'hidden' }}">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    {{ __('Affilix::affiliation.paypal_email') }} <span class="text-red-500">*</span>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                    {{ __('Adresse PayPal') }} <span class="text-red-500">*</span>
                 </label>
                 <input type="email" name="payment_details[paypal_email]"
                     value="{{ old('payment_details.paypal_email', $affiliate->payment_details['paypal_email'] ?? '') }}"
-                    class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                    class="w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition"
                     placeholder="votre@email.com">
             </div>
 
             {{-- Virement bancaire --}}
             <div id="bank-details" class="{{ old('payment_method', $affiliate->payment_method) === 'bank_transfer' ? '' : 'hidden' }} space-y-3">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">IBAN <span class="text-red-500">*</span></label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">IBAN <span class="text-red-500">*</span></label>
                     <input type="text" name="payment_details[iban]"
                         value="{{ old('payment_details.iban', $affiliate->payment_details['iban'] ?? '') }}"
-                        class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                        class="w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition"
                         placeholder="FR76 XXXX XXXX XXXX XXXX XXXX XXX">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">BIC / SWIFT</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">BIC / SWIFT</label>
                     <input type="text" name="payment_details[bic]"
                         value="{{ old('payment_details.bic', $affiliate->payment_details['bic'] ?? '') }}"
-                        class="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                        class="w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition"
                         placeholder="BNPAFRPPXXX">
                 </div>
             </div>
 
-            <div class="flex justify-end pt-2">
+            <div class="flex justify-end pt-1">
                 <button type="submit" class="btn btn-primary">
-                    <i class="bi bi-check-lg mr-1"></i>{{ __('Affilix::affiliation.save') }}
+                    <i class="bi bi-check-lg mr-1.5"></i>{{ __('Enregistrer') }}
                 </button>
             </div>
         </form>
-    </div>
-</div>
-
-{{-- Infos compte --}}
-<div class="card mt-4">
-    <div class="card-heading">
-        <h4>{{ __('Informations du compte') }}</h4>
-    </div>
-    <div class="card-body space-y-3 text-sm">
-        <div class="flex justify-between">
-            <span class="text-gray-500 dark:text-gray-400">{{ __('Affilix::affiliation.referral_code') }}</span>
-            <code class="font-mono text-xs bg-gray-100 dark:bg-gray-700 px-1.5 py-0.5 rounded">{{ $affiliate->referral_code }}</code>
-        </div>
-        <div class="flex justify-between">
-            <span class="text-gray-500 dark:text-gray-400">{{ __('Affilix::affiliation.stats.commission_rate') }}</span>
-            <span class="font-medium">{{ number_format($affiliate->commission_rate, 0) }}%</span>
-        </div>
-        <div class="flex justify-between">
-            <span class="text-gray-500 dark:text-gray-400">{{ __('Affilix::affiliation.status') }}</span>
-            @if($affiliate->status === 'active')
-                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">{{ __('Affilix::affiliation.active') }}</span>
-            @elseif($affiliate->status === 'inactive')
-                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400">{{ __('En attente d\'approbation') }}</span>
-            @else
-                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">{{ __('Affilix::affiliation.suspended') }}</span>
-            @endif
-        </div>
     </div>
 </div>
 

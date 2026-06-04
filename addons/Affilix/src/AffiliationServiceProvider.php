@@ -21,6 +21,11 @@ class AffiliationServiceProvider extends BaseAddonServiceProvider
         //
     }
 
+    public function onEnable(): void
+    {
+        \Artisan::call('migrate', ['--force' => true]);
+    }
+
     public function boot(): void
     {
         if (!is_installed()) {

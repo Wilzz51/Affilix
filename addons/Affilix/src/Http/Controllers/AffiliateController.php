@@ -136,16 +136,22 @@ class AffiliateController extends Controller
 
         $request->validate($rules);
 
-        $affiliate = Affiliate::create([
+        $data = [
             'customer_id'     => Auth::id(),
             'referral_code'   => Affiliate::generateReferralCode(),
             'commission_rate' => affiliation_setting('default_commission_rate', 10),
-            'commission_type' => AffiliationSetting::get('default_commission_type', 'percent'),
             'payment_method'  => $request->payment_method,
             'payment_details' => $request->payment_details ?? [],
             'status'          => affiliation_setting('auto_approve', true) ? 'active' : 'inactive',
             'approved_at'     => affiliation_setting('auto_approve', true) ? now() : null,
-        ]);
+        ];
+
+        // Colonnes ajoutées par des migrations ultérieures — ignorées si la table n'a pas encore été migrée
+        if (\Illuminate\Support\Facades\Schema::hasColumn('affiliates', 'commission_type')) {
+            $data['commission_type'] = AffiliationSetting::get('default_commission_type', 'percent');
+        }
+
+        $affiliate = Affiliate::create($data);
 
         $message = $affiliate->status === 'active'
             ? __('Affilix::affiliation.messages.registered_success')
